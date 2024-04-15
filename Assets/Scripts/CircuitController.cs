@@ -33,12 +33,12 @@ public class CircuitController : MonoBehaviour
         _totalLength = _cumArcLength[_cumArcLength.Length - 1];
     }
 
-    public Vector3 GetSegment(int idx)
+    public Vector3 GetSegment(int idx) //se genera el segmento del circuito que se necesite
     {
         return _pathPos[idx + 1] - _pathPos[idx];
     }
 
-    public float ComputeClosestPointArcLength(Vector3 posIn, out int segIdx, out Vector3 posProjOut, out float distOut)
+    public float ComputeClosestPointArcLength(Vector3 posIn, out int segIdx, out Vector3 posProjOut, out float distOut) //así se cual es mi orden
     {
         int minSegIdx = 0;
         float minArcL = float.NegativeInfinity;

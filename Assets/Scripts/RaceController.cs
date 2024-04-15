@@ -1,18 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RaceController : MonoBehaviour
+public class RaceController : MonoBehaviour //determina mi orden de carrera
 {
     public int numPlayers;
 
-    private readonly List<Player> _players = new(4);
+    private readonly List<Player> _players = new(4); //lista de jugadores
     private CircuitController _circuitController;
-    private GameObject[] _debuggingSpheres;
+    private GameObject[] _debuggingSpheres; //esferas que acompañan 
 
     private void Start()
     {
         if (_circuitController == null) _circuitController = GetComponent<CircuitController>();
 
+        //generamos las esferas que necesitamos
         _debuggingSpheres = new GameObject[GameManager.Instance.numPlayers];
         for (int i = 0; i < GameManager.Instance.numPlayers; ++i)
         {
@@ -61,7 +62,7 @@ public class RaceController : MonoBehaviour
             arcLengths[i] = ComputeCarArcLength(i);
         }
 
-        _players.Sort(new PlayerInfoComparer(arcLengths));
+        _players.Sort(new PlayerInfoComparer(arcLengths)); //el orden de carrera sale de esta linea
 
         string myRaceOrder = "";
         foreach (var player in _players)

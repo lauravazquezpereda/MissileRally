@@ -19,6 +19,8 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.currentRace.AddPlayer(this);
+        GameManager.Instance.currentRace.AddPlayer(this); //para que me siga la pelota y me determine mi orden de carrera
     }
 }
+
+//para agregarme a la carrera solo tengo que aparecer

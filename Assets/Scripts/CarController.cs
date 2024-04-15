@@ -59,7 +59,7 @@ public class CarController : MonoBehaviour
         Speed = _rigidbody.velocity.magnitude;
     }
 
-    public void FixedUpdate()
+    public void FixedUpdate() //logica de conducir
     {
         InputSteering = Mathf.Clamp(InputSteering, -1, 1);
         InputAcceleration = Mathf.Clamp(InputAcceleration, -1, 1);
@@ -112,6 +112,7 @@ public class CarController : MonoBehaviour
             ApplyLocalPositionToVisuals(axleInfo.rightWheel);
         }
 
+        //mejorar la conduccion
         SteerHelper();
         SpeedLimiter();
         AddDownForce();
@@ -147,7 +148,7 @@ public class CarController : MonoBehaviour
     }
 
 // this is used to add more grip in relation to speed
-    private void AddDownForce()
+    private void AddDownForce() //fuerza para que no vuelque mucho
     {
         foreach (var axleInfo in axleInfos)
         {
