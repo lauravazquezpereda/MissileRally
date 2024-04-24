@@ -3,7 +3,7 @@ using UnityEngine;
 public class CircuitController : MonoBehaviour
 {
     private LineRenderer _circuitPath;
-    private Vector3[] _pathPos;
+    [SerializeField] private Vector3[] _pathPos;
     private float[] _cumArcLength;
     private float _totalLength;
 

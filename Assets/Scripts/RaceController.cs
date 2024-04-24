@@ -7,7 +7,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
 
     private readonly List<Player> _players = new(4); //lista de jugadores
     private CircuitController _circuitController;
-    private GameObject[] _debuggingSpheres; //esferas que acompañan 
+    public GameObject[] _debuggingSpheres; //esferas que acompañan 
 
     private void Start()
     {

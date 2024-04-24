@@ -1,5 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CarController : MonoBehaviour
@@ -15,6 +18,12 @@ public class CarController : MonoBehaviour
     [SerializeField] private float topSpeed = 200f;
     [SerializeField] private float downForce = 100f;
     [SerializeField] private float slipLimit = 0.2f;
+
+    [SerializeField] private bool isDumped = false;
+
+    private bool waiting = false;
+
+    public int ID;
 
     private float CurrentRotation { get; set; }
     public float InputAcceleration { get; set; }
@@ -117,6 +126,13 @@ public class CarController : MonoBehaviour
         SpeedLimiter();
         AddDownForce();
         TractionControl();
+
+        // Si ha volcado, inicia la corutina y vuelve a poner el booleano de volcado a false
+        if (isDumped)
+        {
+            StartCoroutine(WaitForReset());
+            isDumped = false;
+        }
     }
 
     #endregion
@@ -207,5 +223,44 @@ public class CarController : MonoBehaviour
         CurrentRotation = transform.eulerAngles.y;
     }
 
+    // Método que actualiza el coche si ha volcado o no
+    private void CheckDump()
+    {
+        if (Math.Abs(transform.rotation.eulerAngles.z) > 65 && !waiting)
+        {
+            this.isDumped = true;
+        } 
+    }
+
+    // Comprueba la colisión si ha sido con la carretera
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Carretera" || collision.gameObject.tag == "Cesped")
+        {
+            CheckDump();
+        }
+    }
+
+    // Recupera la posición que tenia el coche antes de volcarse
+    private void ResetPosition()
+    {
+        // Aquí cogemos la posición de la esfera que esta en GameManager, accediendo a RaceController
+        Vector3 PositionReset = GameManager.Instance.currentRace._debuggingSpheres[ID].transform.position;
+        transform.position = PositionReset;
+
+        // Aquí cogemos la rotación de la esfera que esta en GameManager, accediendo a RaceController
+        Quaternion RotationReset = GameManager.Instance.currentRace._debuggingSpheres[ID].transform.rotation;
+        transform.rotation = RotationReset;
+        transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, 180f+transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+        waiting = false;
+    }
+
+    // Corutina para esperar 3 segundos antes de volver a la posición una vez volcado
+    private IEnumerator WaitForReset()
+    {
+        waiting = true;
+        yield return new WaitForSeconds(3f);
+        ResetPosition();
+    }
     #endregion
 }

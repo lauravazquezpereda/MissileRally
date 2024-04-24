@@ -9,6 +9,9 @@ public class Player : MonoBehaviour
 
     // Race Info
     public GameObject car;
+
+    private CarController carController;
+
     public int CurrentPosition { get; set; }
     public int CurrentLap { get; set; }
 
@@ -20,7 +23,12 @@ public class Player : MonoBehaviour
     private void Start()
     {
         GameManager.Instance.currentRace.AddPlayer(this); //para que me siga la pelota y me determine mi orden de carrera
+
+        // Con esto cogemos el ID del player para así tener la ID de la esfera y poder coger su posición
+        carController = car.GetComponent<CarController>();
+        carController.ID = ID;
     }
+
 }
 
 //para agregarme a la carrera solo tengo que aparecer
