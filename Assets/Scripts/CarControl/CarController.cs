@@ -30,7 +30,7 @@ public class CarController : MonoBehaviour
     public float InputSteering { get; set; }
     public float InputBrake { get; set; }
 
-    //private PlayerInfo m_PlayerInfo;
+    // private PlayerInfo m_PlayerInfo;
 
     private Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;

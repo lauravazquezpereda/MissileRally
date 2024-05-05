@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public int numPlayers = 50;
+    public int numPlayers = 4;
 
     public RaceController currentRace;
 

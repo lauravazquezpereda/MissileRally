@@ -9,7 +9,7 @@ public class Player : MonoBehaviour
 
     // Race Info
     public GameObject car;
-
+    // Controlador del coche 
     private CarController carController;
 
     public int CurrentPosition { get; set; }

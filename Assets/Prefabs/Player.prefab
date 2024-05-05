@@ -82,9 +82,11 @@ GameObject:
   m_Component:
   - component: {fileID: 5767276987077256635}
   - component: {fileID: 533524795805787813}
+  - component: {fileID: 7875963546076460051}
+  - component: {fileID: -5173692563359263095}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -117,7 +119,44 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9cd46121dd4cb44fa09ed8d2673620a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Car: {fileID: 5703065227131910028}
+  car: {fileID: 5703065227131910028}
+--- !u!114 &7875963546076460051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1508097745644926054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83b441f0c125123419d283f8b355844f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  car: {fileID: 5703065227131910028}
+  carController: {fileID: 0}
+  aceleracion: 0.5
+  direccion: 0.1
+--- !u!114 &-5173692563359263095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1508097745644926054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 2244256728
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &3266956378083433421
 GameObject:
   m_ObjectHideFlags: 0
@@ -544,6 +583,8 @@ MonoBehaviour:
   topSpeed: 200
   downForce: 350
   slipLimit: 0.2
+  isDumped: 0
+  ID: 0
 --- !u!65 &4557633551577262268
 BoxCollider:
   m_ObjectHideFlags: 0
