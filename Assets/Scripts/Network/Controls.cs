@@ -19,6 +19,10 @@ public class Controls : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.W))
+        {
+            Debug.Log("Aceleraaa");
+        }
         // CONTROLES DEL COCHE //
         aceleracion = Input.GetAxis("Vertical"); // Controles asignados a las teclas WS
         direccion = Input.GetAxis("Horizontal"); // Controles asignados a las teclas AD
