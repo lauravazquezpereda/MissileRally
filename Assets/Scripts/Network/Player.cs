@@ -1,12 +1,19 @@
 using Cinemachine;
+using System.Runtime.CompilerServices;
+using Unity.Netcode;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class Player: MonoBehaviour
+public class Player: NetworkBehaviour
 {
     // Player Info
     public string Name { get; set; }
     public int ID { get; set; }
+
+    // Materiales del coche
+    public Material[] materialesCoche;
+    public GameObject body;
 
     // Race Info
     public GameObject car;
@@ -27,10 +34,31 @@ public class Player: MonoBehaviour
 
         // Con esto cogemos el ID del player para así tener la ID de la esfera y poder coger su posición
         carController = car.GetComponent<CarController>();
-        carController.ID = ID;
+        ID = (int)OwnerClientId;
+
         // Al aparecer, se hace que la cámara siga al coche
+        if (!IsOwner) return; // La camara sigue su propio objeto player no el de lo demás jugadores
+        
+        carController.ID = ID;
         GameObject.FindGameObjectWithTag("FollowCamera").GetComponent<CinemachineVirtualCamera>().Follow = car.transform;
         GameObject.FindGameObjectWithTag("FollowCamera").GetComponent<CinemachineVirtualCamera>().LookAt = car.transform;
+
+        // Llama a la función SetColor() para seleccionar el color del coche según el ID del jugador
+        SetColor();
+    }
+
+    private void SetColor()
+    {
+        MeshRenderer meshRendererBody;
+
+        meshRendererBody = body.GetComponent<MeshRenderer>();
+
+        Material[] materialAntiguo = meshRendererBody.materials;
+
+        materialAntiguo[0] = materialesCoche[ID];
+        materialAntiguo[1] = materialesCoche[ID];
+
+        meshRendererBody.materials = materialAntiguo;
     }
 
 }
