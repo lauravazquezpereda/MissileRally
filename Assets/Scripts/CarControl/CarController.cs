@@ -127,7 +127,7 @@ public class CarController : MonoBehaviour
         AddDownForce();
         TractionControl();
 
-        // Si ha volcado, inicia la corutina y vuelve a poner el booleano de volcado a false
+        // Si ha volcado, inicia la co-rutina y vuelve a poner el booleano de volcado a false
         if (isDumped)
         {
             StartCoroutine(WaitForReset());
@@ -226,7 +226,7 @@ public class CarController : MonoBehaviour
     // Método que actualiza el coche si ha volcado o no
     private void CheckDump()
     {
-        if (Math.Abs(transform.rotation.eulerAngles.z) > 65 && !waiting)
+        if (Math.Abs(transform.rotation.eulerAngles.z) > 50 && !waiting)
         {
             this.isDumped = true;
         } 

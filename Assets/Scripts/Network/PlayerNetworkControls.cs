@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Controls : MonoBehaviour
+public class PlayerNetworkControls : MonoBehaviour
 {
     public GameObject car;
     public CarController carController;
@@ -17,12 +17,8 @@ public class Controls : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        if(Input.GetKeyDown(KeyCode.W))
-        {
-            Debug.Log("Aceleraaa");
-        }
         // CONTROLES DEL COCHE //
         aceleracion = Input.GetAxis("Vertical"); // Controles asignados a las teclas WS
         direccion = Input.GetAxis("Horizontal"); // Controles asignados a las teclas AD

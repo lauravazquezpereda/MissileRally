@@ -2,7 +2,7 @@ using Cinemachine;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class Player : MonoBehaviour
+public class Player: MonoBehaviour
 {
     // Player Info
     public string Name { get; set; }
