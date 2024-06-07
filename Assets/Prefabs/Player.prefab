@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 7888419986164168736}
   - component: {fileID: 7271018792243021673}
   - component: {fileID: 6307164805103069019}
+  - component: {fileID: 5718062018370413457}
+  - component: {fileID: 6333703482515944258}
   m_Layer: 0
   m_Name: Car
   m_TagString: Untagged
@@ -154,6 +156,49 @@ MonoBehaviour:
   wheelLeft: {fileID: 7838623429930699744}
   wheelRight: {fileID: 9038005763793107711}
   AntiRoll: 5000
+--- !u!114 &5718062018370413457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 467143313492639092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  UseUnreliableDeltas: 0
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
+  SyncScaleX: 0
+  SyncScaleY: 0
+  SyncScaleZ: 0
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
+  InLocalSpace: 0
+  Interpolate: 1
+  SlerpPosition: 0
+--- !u!114 &6333703482515944258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 467143313492639092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6c0be61502bb534f922ebb746851216, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1480283996733225550
 GameObject:
   m_ObjectHideFlags: 0
@@ -634,7 +679,6 @@ GameObject:
   - component: {fileID: 4371312763114662782}
   - component: {fileID: 2169539328235702688}
   - component: {fileID: 8629297117588309096}
-  - component: {fileID: 6180851733291353415}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -711,37 +755,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   car: {fileID: 467143313492639092}
   carController: {fileID: 0}
---- !u!114 &6180851733291353415
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7032828165049873141}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  UseUnreliableDeltas: 0
-  SyncPositionX: 1
-  SyncPositionY: 1
-  SyncPositionZ: 1
-  SyncRotAngleX: 1
-  SyncRotAngleY: 1
-  SyncRotAngleZ: 1
-  SyncScaleX: 0
-  SyncScaleY: 0
-  SyncScaleZ: 0
-  PositionThreshold: 0.001
-  RotAngleThreshold: 0.01
-  ScaleThreshold: 0.01
-  UseQuaternionSynchronization: 0
-  UseQuaternionCompression: 0
-  UseHalfFloatPrecision: 0
-  InLocalSpace: 0
-  Interpolate: 1
-  SlerpPosition: 0
 --- !u!1 &7531833160578058007
 GameObject:
   m_ObjectHideFlags: 0

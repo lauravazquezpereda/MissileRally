@@ -34,7 +34,10 @@ public class Player: NetworkBehaviour
 
         // Con esto cogemos el ID del player para así tener la ID de la esfera y poder coger su posición
         carController = car.GetComponent<CarController>();
-        ID = (int)OwnerClientId;
+        ID = (int) NetworkObjectId - 1;
+
+        // Llama a la función SetColor() para seleccionar el color del coche según el ID del jugador
+        SetColor();
 
         // Al aparecer, se hace que la cámara siga al coche
         if (!IsOwner) return; // La camara sigue su propio objeto player no el de lo demás jugadores
@@ -43,8 +46,6 @@ public class Player: NetworkBehaviour
         GameObject.FindGameObjectWithTag("FollowCamera").GetComponent<CinemachineVirtualCamera>().Follow = car.transform;
         GameObject.FindGameObjectWithTag("FollowCamera").GetComponent<CinemachineVirtualCamera>().LookAt = car.transform;
 
-        // Llama a la función SetColor() para seleccionar el color del coche según el ID del jugador
-        SetColor();
     }
 
     private void SetColor()
