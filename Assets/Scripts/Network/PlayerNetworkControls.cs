@@ -40,6 +40,7 @@ public class PlayerNetworkControls : NetworkBehaviour
     [ServerRpc]
     private void ProcessMovementServerRpc(float aceleracion, float direccion, int idJugador)
     {
+        /*
         // Se obtienen todos los jugadores de la escena
         GameObject[] listaJugadores = GameObject.FindGameObjectsWithTag("Player");
         // Se recorren todos los jugadores, hasta que se encuentra aquel cuyo id coincide con el del que ha enviado el mensaje
@@ -53,13 +54,36 @@ public class PlayerNetworkControls : NetworkBehaviour
                 cocheJugador.InputAcceleration = aceleracion;
                 cocheJugador.InputSteering = direccion * 0.5f; // Para disminuir la brusquedad al cambiar de dirección
                 Debug.Log("El coche " + idJugador + " debe tener una aceleración de " + aceleracion + " y una dirección de " + direccion);
+                // Se sincroniza la posición con todos los clientes
+                UpdatePositionClientRpc(car.transform.position, car.transform.rotation, idJugador);
             }
         }
-        // Se sincroniza con todos los clientes
-        UpdatePositionClientRpc(aceleracion, direccion, idJugador);
+        */
+
+        if(carController.ID == idJugador)
+        {
+            carController.InputAcceleration = aceleracion;
+            carController.InputSteering = direccion * 0.5f; // Para disminuir la brusquedad al cambiar de dirección
+            Debug.Log("El coche " + idJugador + " debe tener una aceleración de " + aceleracion + " y una dirección de " + direccion);
+            // Se sincroniza la posición con todos los clientes
+            UpdatePositionClientRpc(car.transform.position, car.transform.rotation, idJugador);
+        }
 
     }
 
+    [ClientRpc]
+    private void UpdatePositionClientRpc(Vector3 posicionCoche, Quaternion rotacionCoche, int idJugador)
+    {
+        if (carController.ID == idJugador)
+        {
+            car.transform.position = posicionCoche;
+            car.transform.rotation = rotacionCoche;
+            Debug.Log("El coche " + idJugador + " debe tener una aceleración de " + aceleracion + " y una dirección de " + direccion);
+        }
+
+    }
+
+    /*
     [ClientRpc]
     private void UpdatePositionClientRpc(float aceleracion, float direccion, int idJugador)
     {
@@ -79,5 +103,6 @@ public class PlayerNetworkControls : NetworkBehaviour
             }
         }
     }
+    */
 
 }
