@@ -62,6 +62,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
             arcLengths[i] = ComputeCarArcLength(i);
         }
 
+
         _players.Sort(new PlayerInfoComparer(arcLengths)); //el orden de carrera sale de esta linea
 
         string myRaceOrder = "";
