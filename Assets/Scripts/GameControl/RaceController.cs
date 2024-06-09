@@ -9,6 +9,16 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
     private CircuitController _circuitController;
     public GameObject[] _debuggingSpheres; //esferas que acompañan 
 
+    public static RaceController instance;
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+    }
+
     private void Start()
     {
         if (_circuitController == null) _circuitController = GetComponent<CircuitController>();
