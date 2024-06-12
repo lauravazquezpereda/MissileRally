@@ -34,6 +34,6 @@ public class NetManager : MonoBehaviour
         GameObject playerObj = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
         playerObj.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
 
-        RaceController.instance.AddPlayer(playerObj.GetComponent<Player>()); //añadimos los jugadores a la lista
+        RaceController.instance.AddPlayer(playerObj.GetComponent<PlayerNetwork>()); //añadimos los jugadores a la lista
     }
 }

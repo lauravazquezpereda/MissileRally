@@ -5,7 +5,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
 {
     public int numPlayers;
 
-    private readonly List<Player> _players = new(4); //lista de jugadores
+    private readonly List<PlayerNetwork> _players = new(4); //lista de jugadores
     private CircuitController _circuitController;
     public GameObject[] _debuggingSpheres; //esferas que acompañan 
 
@@ -40,12 +40,12 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
         UpdateRaceProgress();
     }
 
-    public void AddPlayer(Player player)
+    public void AddPlayer(PlayerNetwork player)
     {
         _players.Add(player);
     }
 
-    private class PlayerInfoComparer : Comparer<Player>
+    private class PlayerInfoComparer : Comparer<PlayerNetwork>
     {
         readonly float[] _arcLengths;
 
@@ -54,7 +54,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
             _arcLengths = arcLengths;
         }
 
-        public override int Compare(Player x, Player y)
+        public override int Compare(PlayerNetwork x, PlayerNetwork y)
         {
             if (_arcLengths[x.ID] < _arcLengths[y.ID])
                 return 1;

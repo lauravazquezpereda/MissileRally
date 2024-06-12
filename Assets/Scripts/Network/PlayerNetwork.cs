@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class Player: NetworkBehaviour
+public class PlayerNetwork: NetworkBehaviour
 {
     // Player Info
     public string Name { get; set; }
