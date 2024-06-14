@@ -677,8 +677,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3252173202198594105}
   - component: {fileID: 4371312763114662782}
-  - component: {fileID: 2169539328235702688}
   - component: {fileID: 8629297117588309096}
+  - component: {fileID: 8098850279213290149}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -714,7 +714,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1822872711
+  GlobalObjectIdHash: 408901148
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -723,24 +723,6 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &2169539328235702688
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7032828165049873141}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9cd46121dd4cb44fa09ed8d2673620a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  materialesCoche:
-  - {fileID: 2100000, guid: e01835458edd3f245a4d3d219ca2735c, type: 2}
-  - {fileID: 2100000, guid: 78e3aa15ddfc1f34d87a0d33a76a171f, type: 2}
-  - {fileID: 2100000, guid: 7382ae7bdf5cedd4594351d7beb9f7c4, type: 2}
-  body: {fileID: 7660502697440113241}
-  car: {fileID: 467143313492639092}
 --- !u!114 &8629297117588309096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -755,6 +737,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   car: {fileID: 467143313492639092}
   carController: {fileID: 0}
+--- !u!114 &8098850279213290149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7032828165049873141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f0c54808ecf3dc45826f017961797c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  materialesCoche:
+  - {fileID: 2100000, guid: e01835458edd3f245a4d3d219ca2735c, type: 2}
+  - {fileID: 2100000, guid: 78e3aa15ddfc1f34d87a0d33a76a171f, type: 2}
+  - {fileID: 2100000, guid: 7382ae7bdf5cedd4594351d7beb9f7c4, type: 2}
+  - {fileID: 2100000, guid: 0f318c434e99fd941a6fe472546735ca, type: 2}
+  - {fileID: 2100000, guid: 21c4cdd7952e86e4397612b587470405, type: 2}
+  body: {fileID: 7660502697440113241}
+  car: {fileID: 467143313492639092}
 --- !u!1 &7531833160578058007
 GameObject:
   m_ObjectHideFlags: 0
@@ -900,8 +902,8 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e01835458edd3f245a4d3d219ca2735c, type: 2}
-  - {fileID: 2100000, guid: e01835458edd3f245a4d3d219ca2735c, type: 2}
+  - {fileID: 2100000, guid: 21c4cdd7952e86e4397612b587470405, type: 2}
+  - {fileID: 2100000, guid: 21c4cdd7952e86e4397612b587470405, type: 2}
   - {fileID: 2100000, guid: 41e1aec23123f8247ad9849e27213955, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0

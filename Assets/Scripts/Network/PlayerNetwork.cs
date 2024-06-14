@@ -36,9 +36,6 @@ public class PlayerNetwork: NetworkBehaviour
         carController = car.GetComponent<CarController>();
         ID = (int) NetworkObjectId - 1;
 
-        // Llama a la función SetColor() para seleccionar el color del coche según el ID del jugador
-        SetColor();
-
         // Al aparecer, se hace que la cámara siga al coche
         if (!IsOwner) return; // La camara sigue su propio objeto player no el de lo demás jugadores
         
@@ -48,18 +45,19 @@ public class PlayerNetwork: NetworkBehaviour
 
     }
 
-    private void SetColor()
+    // Función que modifica el color del coche en función de lo escogido en el menú
+    public void SetColor(int idColor)
     {
         MeshRenderer meshRendererBody;
 
         meshRendererBody = body.GetComponent<MeshRenderer>();
 
-        Material[] materialAntiguo = meshRendererBody.materials;
+        Material[] materialAntiguo = meshRendererBody.sharedMaterials;
 
-        materialAntiguo[0] = materialesCoche[ID];
-        materialAntiguo[1] = materialesCoche[ID];
+        materialAntiguo[0] = materialesCoche[idColor];
+        materialAntiguo[1] = materialesCoche[idColor];
 
-        meshRendererBody.materials = materialAntiguo;
+        meshRendererBody.sharedMaterials = materialAntiguo;
     }
 
 }

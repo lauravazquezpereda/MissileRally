@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
@@ -8,6 +9,8 @@ using UnityEngine;
 
 public class TestLobby : MonoBehaviour
 {
+    public static TestLobby Instance;
+
     Lobby hostLobby;
     Lobby joinedLobby;
 
@@ -19,6 +22,18 @@ public class TestLobby : MonoBehaviour
     string playerHostName = "playerHost";
     string playerColor = "yellow";
 
+    public bool salaCreada = false;
+
+    // Creación de un semáforo para gestionar que no se muestre el código de la sala por pantalla, hasta que no se haya terminado de crear la propia sala
+    public SemaphoreSlim semaforoCreacionLobby = new (0);
+
+    private void Awake()
+    {
+        if(Instance == null)
+        {
+            Instance = this;
+        }
+    }
 
     // Start is called before the first frame update
     private async void Start()
@@ -31,22 +46,14 @@ public class TestLobby : MonoBehaviour
             Debug.Log("Jugador registrado: " + AuthenticationService.Instance.PlayerId);
         };
 
-
-        await AuthenticationService.Instance.SignInAnonymouslyAsync(); // Se hace un registro anónimo, para no tener que guardar credenciales de cada jugador
-
     }
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.W)) 
+        if(hostLobby!= null)
         {
-            CreateLobby();
+            HandleLobbyHeartbeat();
         }
-        if(Input.GetKeyDown(KeyCode.S))
-        {
-            // JoinLobby();
-        }
-        HandleLobbyHeartbeat();
     }
 
     // Esta función se utiliza para enviar un mensaje al lobby cada 15 segundos, para evitar que la sala desaparezca por inactividad
@@ -63,10 +70,13 @@ public class TestLobby : MonoBehaviour
         }
     }
 
-    private async void CreateLobby()
+    public async void CreateLobby()
     {
         try
         {
+            // Es necesario autenticarse para poder crear la sala
+            await AuthenticationService.Instance.SignInAnonymouslyAsync(); // Se hace un registro anónimo, para no tener que guardar credenciales de cada jugador
+
             // Definición de las propiedades del lobby
             CreateLobbyOptions options = new CreateLobbyOptions
             {
@@ -84,16 +94,19 @@ public class TestLobby : MonoBehaviour
 
             PrintPlayers(lobby);
 
+            semaforoCreacionLobby.Release();
+
         } catch(LobbyServiceException e)
         {
             Debug.Log(e);
         }
     }
 
-    private async void JoinLobby(string code)
+    public async void JoinLobby(string code)
     {
         try
         {
+            await AuthenticationService.Instance.SignInAnonymouslyAsync(); // Se hace un registro anónimo, para no tener que guardar credenciales de cada jugador
             // Se crea un jugador con las características correspondientes
             JoinLobbyByCodeOptions options = new JoinLobbyByCodeOptions
             {
@@ -106,6 +119,7 @@ public class TestLobby : MonoBehaviour
             Debug.Log("Joined Lobby with code: " + code);
 
             PrintPlayers(lobby);
+            semaforoCreacionLobby.Release();
         }
         catch(LobbyServiceException e)
         {
@@ -114,7 +128,7 @@ public class TestLobby : MonoBehaviour
     }
 
     // Con esta función, el jugador abandona la sala
-    private async void LeaveLobby()
+    public async void LeaveLobby()
     {
         try
         {
@@ -148,8 +162,48 @@ public class TestLobby : MonoBehaviour
         }
     }
 
+    // Función para modificar el nombre del jugador
 
+    public void ModifyNamePlayer(string newName)
+    {
+        playerHostName = newName;
+    }
 
+    // Función para modificar el color del jugador
 
+    public void ModifyColor(string color)
+    {
+        playerColor = color;
+    }
+
+    public string GetCode()
+    {
+        return joinedLobby.LobbyCode;
+    }
+
+    // Función para obtener los datos de los jugadores en el lobby y poder mostrarlos
+    public Dictionary<string, List<string>> GetPlayersInLobby()
+    {
+        // Se crea un diccionario de listas de strings, para almacenar los nombres y los colores escogidos por los jugadores
+        Dictionary<string, List<string>> datosPlayers = new Dictionary<string, List<string>>();
+        // Se crea la lista de colores y se van añadiendo los colores de cada uno de los jugadores
+        List<string> colores = new List<string>();
+        foreach(Player p in joinedLobby.Players)
+        {
+            colores.Add(p.Data["CarColor"].Value);
+        }
+        // Se añade la lista al diccionario
+        datosPlayers.Add("Colores", colores);
+        // Se crea la lista de nombres y se van añadiendo los nombres de cada uno de los jugadores
+        List<string> nombres = new List<string>();
+        foreach(Player p in joinedLobby.Players)
+        {
+            nombres.Add(p.Data["Name"].Value);
+        }
+        // Se añade la lista al diccionario
+        datosPlayers.Add("Nombres", nombres);
+
+        return datosPlayers;
+    }
     
 }

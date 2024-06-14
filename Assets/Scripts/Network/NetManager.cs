@@ -5,9 +5,18 @@ using UnityEngine;
 
 public class NetManager : MonoBehaviour
 {
+    public static NetManager instance;
+
     [SerializeField] private List<Transform> posCoche;
     [SerializeField] private GameObject playerPrefab;
 
+    private void Awake()
+    {
+        if(instance == null)
+        {
+            instance = this;
+        }
+    }
 
     private void Start()
     {
@@ -36,4 +45,16 @@ public class NetManager : MonoBehaviour
 
         RaceController.instance.AddPlayer(playerObj.GetComponent<PlayerNetwork>()); //añadimos los jugadores a la lista
     }
+
+    public void ModifyPrefabColor(int idColor)
+    {
+        // Se accede al componente Player del prefab, para modificar su color
+        PlayerNetwork p = playerPrefab.GetComponent<PlayerNetwork>();
+        if (p != null)
+        {
+            p.SetColor(idColor);
+            Debug.Log("Cambiando color");
+        }
+    }
+
 }
