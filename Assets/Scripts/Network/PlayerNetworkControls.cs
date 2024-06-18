@@ -7,71 +7,68 @@ public class PlayerNetworkControls : NetworkBehaviour
 {
     public GameObject car;
     public CarController carController;
-    float aceleracion;
-    float direccion;
+    // Esta variable se utiliza para almacenar la velocidad del coche, que se recibe del servidor
+    private float speed;
 
     // Start is called before the first frame update
     void Start()
     {
-        // Se asigna el controlador para poder manejar el coche
+        // Asigna el controlador para manejar el coche
         carController = car.GetComponent<CarController>();
         UI_HUD.Instance.inicioCarrera = true;
+        // Se indica al controlador del coche que es el Owner
+        carController.IsOwner = true;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (!IsOwner) return; // Solo puede moverse su propio objeto player no el de lo dem�s jugadores
+        if (!IsOwner) return; // Solo el jugador propietario puede controlar su coche
 
-        carController.IsOwner = true;
-        // CONTROLES DEL COCHE //
-        aceleracion = Input.GetAxis("Vertical"); // Controles asignados a las teclas WS
-        direccion = Input.GetAxis("Horizontal"); // Controles asignados a las teclas AD
+        // Captura la entrada de aceleración y dirección
+        float acceleration = Input.GetAxis("Vertical");
+        float steering = Input.GetAxis("Horizontal");
 
-        ProcessMovementServerRpc(aceleracion, direccion, carController.ID);
+        // Procesa el movimiento del coche en el servidor
+        ProcessMovementServerRpc(acceleration, steering, carController.ID);
 
+        // Modifica el HUD de la velocidad, con la velocidad recibida del servidor
+        UI_HUD.Instance.ModificarVelocimetro(speed);
     }
 
     [ServerRpc]
-    private void ProcessMovementServerRpc(float aceleracion, float direccion, int idJugador)
+    void ProcessMovementServerRpc(float acceleration, float steering, int playerId)
     {
-        // Se recorren todos los jugadores que están en la carrera, hasta que se encuentra aquel cuyo id coincide con el del que ha enviado el mensaje
-        foreach (PlayerNetwork jugador in RaceController.instance._players)
+        float currentSpeed = 0f;
+
+        foreach (PlayerNetwork player in GameManager.Instance.currentRace._players)
         {
-            if (jugador.ID == idJugador)
+            if (player.ID == playerId)
             {
-                // Se procesan la aceleracion y la direccion
-                CarController cocheJugador = jugador.GetComponentInChildren<CarController>();
-                cocheJugador.InputAcceleration = aceleracion;
-                cocheJugador.InputSteering = direccion * 0.5f; // Para disminuir la brusquedad al cambiar de direccion
-                Debug.Log("El coche " + idJugador + " debe tener una aceleracion de " + aceleracion + " y una direccion de " + direccion);
+                // Actualiza la entrada de aceleración y dirección en el jugador correspondiente, para que se mueva adecuadamente
+                CarController playerCar = player.GetComponentInChildren<CarController>();
+                playerCar.InputAcceleration = acceleration;
+                playerCar.InputSteering = steering * 0.5f; // Reducir la brusquedad al cambiar de dirección
+                currentSpeed = playerCar._currentSpeed; // Se obtiene la velocidad actual del coche, para después transmitirla a los clientes
             }
         }
-        // Se sincroniza con todos los clientes
-        UpdatePositionClientRpc(aceleracion, direccion, idJugador);
 
+        UpdateSpeedClientRpc(currentSpeed, playerId);
     }
 
+    // A través de esta función, el cliente recibe el valor de la velocidad del coche en el servidor, para poder modificar el HUD en consecuencia
     [ClientRpc]
-    private void UpdatePositionClientRpc(float aceleracion, float direccion, int idJugador)
+    void UpdateSpeedClientRpc(float currentSpeed, int playerId)
     {
-        // Se recorren todos los jugadores que están en la carrera, hasta que se encuentra aquel cuyo id coincide con el del que ha enviado el mensaje
-        foreach (PlayerNetwork jugador in RaceController.instance._players)
+        foreach (PlayerNetwork player in GameManager.Instance.currentRace._players)
         {
-            if (jugador.ID == idJugador)
+            if (player.ID == playerId)
             {
-                // Se procesan la aceleracion y la direccion
-                CarController cocheJugador = jugador.GetComponentInChildren<CarController>();
-                cocheJugador.InputAcceleration = aceleracion;
-                cocheJugador.InputSteering = direccion * 0.5f; // Para disminuir la brusquedad al cambiar de direccion
-                // ACTUALIZACIÓN DEL HUD //
-                float velocidadActual = cocheJugador._currentSpeed;
-                UI_HUD.Instance.ModificarVelocimetro(velocidadActual);
-                Debug.Log("El coche " + idJugador + " debe tener una aceleracion de " + aceleracion + " y una direccion de " + direccion);
+                speed = currentSpeed;
             }
         }
     }
-
+    
 }
 
 

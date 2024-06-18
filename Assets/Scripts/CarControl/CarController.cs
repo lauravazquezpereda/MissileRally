@@ -266,7 +266,7 @@ public class CarController : MonoBehaviour
         ResetPosition();
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void OnTriggerEnter(Collider other)
     {
         if(other.gameObject.tag == "Meta")
         {

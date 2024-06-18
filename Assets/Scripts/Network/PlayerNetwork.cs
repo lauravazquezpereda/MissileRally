@@ -1,10 +1,12 @@
 using Cinemachine;
+using System;
 using System.Runtime.CompilerServices;
 using Unity.Netcode;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+[System.Serializable]
 public class PlayerNetwork: NetworkBehaviour
 {
     // Player Info
@@ -22,6 +24,9 @@ public class PlayerNetwork: NetworkBehaviour
 
     public int CurrentPosition { get; set; }
     public int CurrentLap { get; set; }
+
+    // Velocidad
+    public float speed;
 
     public override string ToString()
     {
