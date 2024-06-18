@@ -36,7 +36,9 @@ public class CarController : MonoBehaviour
     private float _steerHelper = 0.8f;
 
 
-    private float _currentSpeed = 0;
+    public float _currentSpeed = 0;
+
+    public bool IsOwner = false; // Esta variable se encarga de indicar si el coche es del cliente que está jugando
 
     private float Speed
     {
@@ -262,6 +264,17 @@ public class CarController : MonoBehaviour
         waiting = true;
         yield return new WaitForSeconds(3f);
         ResetPosition();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.tag == "Meta")
+        {
+            if(IsOwner)
+            {
+                UI_HUD.Instance.AvanzarVuelta();
+            }
+        } 
     }
     #endregion
 }

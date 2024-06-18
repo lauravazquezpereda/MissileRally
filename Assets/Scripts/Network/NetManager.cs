@@ -12,7 +12,7 @@ public class NetManager : MonoBehaviour
 
     private void Awake()
     {
-        if(instance == null)
+        if (instance == null)
         {
             instance = this;
         }
@@ -33,13 +33,19 @@ public class NetManager : MonoBehaviour
     private void OnClientConnected(ulong clientId)
     {
         Debug.Log("Client connected with ID: " + clientId);
+
+        // Solo el servidor debería manejar la generación del coche
+        if (NetworkManager.Singleton.IsServer)
+        {
+            SpawnCar(clientId);
+        }
     }
 
     public void SpawnCar(ulong clientId)
     {
-        Vector3 spawnPosition = posCoche[(int)clientId].position; //posicion en la que spawnea el coche
+        Vector3 spawnPosition = posCoche[(int)clientId].position; //posición en la que spawnea el coche
 
-        //Instanciamos el objecto en la escena en la posición de arriba
+        //Instanciamos el objeto en la escena en la posición de arriba
         GameObject playerObj = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
         playerObj.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
 
@@ -56,5 +62,5 @@ public class NetManager : MonoBehaviour
             Debug.Log("Cambiando color");
         }
     }
-
 }
+

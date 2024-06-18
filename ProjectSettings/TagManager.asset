@@ -8,6 +8,8 @@ TagManager:
   - Cesped
   - Carretera
   - FollowCamera
+  - Meta
+  - Arena
   layers:
   - Default
   - TransparentFX
