@@ -44,6 +44,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
         {
             carreraPreparada = true;
             _circuitController.StartCircuit();
+            ModificarColorCoches();
         } 
         if(carreraPreparada)
         {
@@ -120,5 +121,36 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
         }
 
         return minArcL;
+    }
+
+    private void ModificarColorCoches()
+    {
+        // Corregir el color de los coches
+
+        Dictionary<string, List<string>> datosJugadores = TestLobby.Instance.GetPlayersInLobby();
+        datosJugadores.TryGetValue("Colores", out List<string> colores);
+
+        for (int i = 0; i < TestLobby.Instance.NUM_PLAYERS_IN_LOBBY; i++)
+        {
+            string color = colores[i];
+            switch (color)
+            {
+                case "red":
+                    _players[i].SetColor(0);
+                    break;
+                case "yellow":
+                    _players[i].SetColor(1);
+                    break;
+                case "green":
+                    _players[i].SetColor(2);
+                    break;
+                case "blue":
+                    _players[i].SetColor(3);
+                    break;
+                case "orange":
+                    _players[i].SetColor(4);
+                    break;
+            }
+        }
     }
 }

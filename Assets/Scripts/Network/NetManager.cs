@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class NetManager : NetworkBehaviour
+public class NetManager : MonoBehaviour
 {
     public static NetManager instance;
 
@@ -34,14 +34,6 @@ public class NetManager : NetworkBehaviour
         Debug.Log("Client connected with ID: " + clientId);
 
         numClients++;
-
-        // Solo el servidor debería manejar la generación del coche
-        /*
-        if (NetworkManager.Singleton.IsServer)
-        {
-            SpawnCar(clientId);
-        }
-        */
     }
 
     public void GeneratePlayersInCircuit()
@@ -50,11 +42,12 @@ public class NetManager : NetworkBehaviour
 
         if (NetworkManager.Singleton.IsServer)
         {
-            for(int i=0; i<numClients; i++)
+            for (int i = 0; i < numClients; i++)
             {
                 SpawnCar((ulong)i);
             }
         }
+        
     }
 
     public void SpawnCar(ulong clientId)

@@ -17,6 +17,7 @@ public class PlayerNetworkControls : NetworkBehaviour
         carController = car.GetComponent<CarController>();
         UI_HUD.Instance.inicioCarrera = true;
         // Se indica al controlador del coche que es el Owner
+        if (!IsOwner) return;
         carController.IsOwner = true;
     }
 

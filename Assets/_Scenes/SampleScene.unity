@@ -2552,7 +2552,7 @@ GameObject:
   - component: {fileID: 386280555}
   - component: {fileID: 386280554}
   - component: {fileID: 386280553}
-  - component: {fileID: 386280557}
+  - component: {fileID: 386280556}
   m_Layer: 0
   m_Name: '@NetworkManager'
   m_TagString: Untagged
@@ -2639,7 +2639,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &386280557
+--- !u!114 &386280556
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8599,7 +8599,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1484370985
 RectTransform:
   m_ObjectHideFlags: 0
