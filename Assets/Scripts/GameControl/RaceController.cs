@@ -6,10 +6,13 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
     public int numPlayers;
 
     [SerializeField] public List<PlayerNetwork> _players = new(4); //lista de jugadores
-    private CircuitController _circuitController;
+    [SerializeField] private CircuitController _circuitController;
     public GameObject[] _debuggingSpheres; //esferas que acompañan 
 
     public static RaceController instance;
+
+    public bool carreraIniciada = false;
+    public bool carreraPreparada = false;
 
     private void Awake()
     {
@@ -23,7 +26,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
     {
         if (_circuitController == null) _circuitController = GetComponent<CircuitController>();
 
-        //generamos las esferas que necesitamos
+        // generamos las esferas que necesitamos
         _debuggingSpheres = new GameObject[GameManager.Instance.numPlayers];
         for (int i = 0; i < GameManager.Instance.numPlayers; ++i)
         {
@@ -37,7 +40,15 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
         if (_players.Count == 0)
             return;
 
-        UpdateRaceProgress();
+        if(carreraIniciada && !carreraPreparada)
+        {
+            carreraPreparada = true;
+            _circuitController.StartCircuit();
+        } 
+        if(carreraPreparada)
+        {
+            // UpdateRaceProgress();
+        }
     }
 
     public void AddPlayer(PlayerNetwork player)

@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class NetManager : MonoBehaviour
+public class NetManager : NetworkBehaviour
 {
     public static NetManager instance;
 
     [SerializeField] private List<Transform> posCoche;
     [SerializeField] private GameObject playerPrefab;
+
+    public int circuitoSeleccionado;
+    public int numClients = 0;
+
+    private const int NUM_CIRCUITOS = 4;
 
     private void Awake()
     {
@@ -24,26 +29,37 @@ public class NetManager : MonoBehaviour
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
     }
 
-    private void OnDestroy()
-    {
-        // Desuscribir el evento para evitar errores de referencia nula
-        NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
-    }
-
     private void OnClientConnected(ulong clientId)
     {
         Debug.Log("Client connected with ID: " + clientId);
 
+        numClients++;
+
         // Solo el servidor debería manejar la generación del coche
+        /*
         if (NetworkManager.Singleton.IsServer)
         {
             SpawnCar(clientId);
+        }
+        */
+    }
+
+    public void GeneratePlayersInCircuit()
+    {
+        RaceController.instance.carreraIniciada = true;
+
+        if (NetworkManager.Singleton.IsServer)
+        {
+            for(int i=0; i<numClients; i++)
+            {
+                SpawnCar((ulong)i);
+            }
         }
     }
 
     public void SpawnCar(ulong clientId)
     {
-        Vector3 spawnPosition = posCoche[(int)clientId].position; //posición en la que spawnea el coche
+        Vector3 spawnPosition = posCoche[(int)clientId + (circuitoSeleccionado * NUM_CIRCUITOS)].position; // posición en la que spawnea el coche - se tiene en cuenta el circuito escogido, ya que las posiciones están ordenadas
 
         //Instanciamos el objeto en la escena en la posición de arriba
         GameObject playerObj = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);

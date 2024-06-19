@@ -21,7 +21,7 @@ public class PlayerNetworkControls : NetworkBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
         if (!IsOwner) return; // Solo el jugador propietario puede controlar su coche
 
@@ -36,7 +36,7 @@ public class PlayerNetworkControls : NetworkBehaviour
         UI_HUD.Instance.ModificarVelocimetro(speed);
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     void ProcessMovementServerRpc(float acceleration, float steering, int playerId)
     {
         float currentSpeed = 0f;

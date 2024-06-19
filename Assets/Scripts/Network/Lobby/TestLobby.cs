@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity.Netcode;
 
 public class TestLobby : MonoBehaviour
 {
@@ -30,6 +31,10 @@ public class TestLobby : MonoBehaviour
     public SemaphoreSlim semaforoCreacionLobby = new(0);
 
     private bool jugadorRegistrado = false;
+
+    public bool juegoIniciado = false;
+
+    public int NUM_PLAYERS_IN_LOBBY;
 
     private void Awake()
     {
@@ -258,6 +263,8 @@ public class TestLobby : MonoBehaviour
                 var tarea = GetLobby();
                 // Mediante un delegado, se espera a que la tarea finalice para continuar
                 yield return new WaitUntil(() => tarea.IsCompleted);
+
+                NUM_PLAYERS_IN_LOBBY = joinedLobby.Players.Count;
             }
         }
     }
@@ -297,6 +304,62 @@ public class TestLobby : MonoBehaviour
         yield return LeaveLobby();
         enSala = false;
         Application.Quit();
-    } 
+    }
+
+    // CÓDIGO NECESARIO PARA INICIAR EL JUEGO UNA VEZ HAYA DOS O MÁS JUGADORES
+    public async void StartGame()
+    {
+        if (juegoIniciado) return;
+        juegoIniciado = true;
+
+        // El primer jugador del lobby será el host
+        var hostPlayer = joinedLobby.Players[0];
+
+        if (AuthenticationService.Instance.PlayerId == hostPlayer.Id)
+        {
+            // Este jugador es el host
+            NetworkManager.Singleton.StartHost();
+
+            // Actualizar el lobby para indicar que el juego ha comenzado
+            var data = new Dictionary<string, PlayerDataObject>
+            {
+                { "HostStarted", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, "true") }
+            };
+
+            var options = new UpdatePlayerOptions
+            {
+                Data = data
+            };
+
+            await LobbyService.Instance.UpdatePlayerAsync(joinedLobby.Id, AuthenticationService.Instance.PlayerId, options);
+
+            UI_Circuit.instance.MostrarMenu();
+        }
+        else
+        {
+            // Este jugador es un cliente
+            // Verificar si el host ha iniciado el juego
+            StartCoroutine(WaitForHostToStart());
+        }
+    }
+
+    private IEnumerator WaitForHostToStart()
+    {
+        while (true)
+        {
+            if (joinedLobby.Players[0].Data.TryGetValue("HostStarted", out PlayerDataObject hostStarted) && hostStarted.Value == "true")
+            {
+                NetworkManager.Singleton.StartClient();
+                UI_Circuit.instance.MostrarMenu();
+                yield break;
+            }
+            else
+            {
+                Debug.Log("Esperando a que el host inicie el juego.");
+                UI_LobbyWaiting.instance.textoEsperaHost.SetActive(true);
+                yield return new WaitForSeconds(1f);
+            }
+        }
+    }
 
 }

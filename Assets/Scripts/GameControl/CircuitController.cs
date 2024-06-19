@@ -12,8 +12,9 @@ public class CircuitController : MonoBehaviour
         get { return _totalLength; }
     }
 
-    void Start()
+    public void StartCircuit()
     {
+        /*
         _circuitPath = GetComponentInChildren<LineRenderer>();
 
         int numPoints = _circuitPath.positionCount;
@@ -31,6 +32,7 @@ public class CircuitController : MonoBehaviour
         }
 
         _totalLength = _cumArcLength[_cumArcLength.Length - 1];
+        */
     }
 
     public Vector3 GetSegment(int idx) //se genera el segmento del circuito que se necesite

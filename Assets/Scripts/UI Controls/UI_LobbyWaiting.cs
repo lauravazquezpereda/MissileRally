@@ -18,6 +18,7 @@ public class UI_LobbyWaiting : MonoBehaviour
     [SerializeField] GameObject canvasLobbyWaiting;
     [SerializeField] GameObject canvasLobby;
     [SerializeField] GameObject botonComenzar;
+    public GameObject textoEsperaHost;
 
     private void Awake()
     {
@@ -104,7 +105,7 @@ public class UI_LobbyWaiting : MonoBehaviour
 
     public void IniciarPartida()
     {
-        canvasLobbyWaiting.SetActive(false);
+        TestLobby.Instance.StartGame();
     }
 
 }
