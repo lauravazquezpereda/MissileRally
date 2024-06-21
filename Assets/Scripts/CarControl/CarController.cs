@@ -229,7 +229,7 @@ public class CarController : MonoBehaviour
     // Método que actualiza el coche si ha volcado o no
     private void CheckDump()
     {
-        if (Math.Abs(transform.rotation.eulerAngles.z) > 50 && !waiting)
+        if (Math.Abs(transform.rotation.eulerAngles.z) > 50 && !waiting && !EndingController.Instance.carreraFinalizada)
         {
             this.isDumped = true;
         } 

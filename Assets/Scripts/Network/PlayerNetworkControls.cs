@@ -26,6 +26,16 @@ public class PlayerNetworkControls : NetworkBehaviour
     {
         if (!IsOwner) return; // Solo el jugador propietario puede controlar su coche
 
+        // Si se ha terminado la carrera, ya no se reciben más inputs
+        if (EndingController.Instance.carreraFinalizada)
+        {
+            if(NetworkManager.Singleton.IsConnectedClient)
+            {
+                ProcessMovementServerRpc(0, 0, carController.ID);
+            }
+            return;
+        }
+        
         // Captura la entrada de aceleración y dirección
         float acceleration = Input.GetAxis("Vertical");
         float steering = Input.GetAxis("Horizontal");
@@ -48,9 +58,12 @@ public class PlayerNetworkControls : NetworkBehaviour
             {
                 // Actualiza la entrada de aceleración y dirección en el jugador correspondiente, para que se mueva adecuadamente
                 CarController playerCar = player.GetComponentInChildren<CarController>();
-                playerCar.InputAcceleration = acceleration;
-                playerCar.InputSteering = steering * 0.5f; // Reducir la brusquedad al cambiar de dirección
-                currentSpeed = playerCar._currentSpeed; // Se obtiene la velocidad actual del coche, para después transmitirla a los clientes
+                if(playerCar != null)
+                {
+                    playerCar.InputAcceleration = acceleration;
+                    playerCar.InputSteering = steering * 0.5f; // Reducir la brusquedad al cambiar de dirección
+                    currentSpeed = playerCar._currentSpeed; // Se obtiene la velocidad actual del coche, para después transmitirla a los clientes
+                }
             }
         }
 
@@ -69,6 +82,8 @@ public class PlayerNetworkControls : NetworkBehaviour
             }
         }
     }
+    
+
     
 }
 

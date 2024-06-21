@@ -718,9 +718,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GlobalObjectIdHash: 408901148
   InScenePlacedSourceGlobalObjectIdHash: 0
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 0
-  ActiveSceneSynchronization: 0
+  AlwaysReplicateAsRoot: 1
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 1
   SceneMigrationSynchronization: 1
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
@@ -751,6 +751,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f0c54808ecf3dc45826f017961797c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Name: 
+  ID: 0
   materialesCoche:
   - {fileID: 2100000, guid: e01835458edd3f245a4d3d219ca2735c, type: 2}
   - {fileID: 2100000, guid: 78e3aa15ddfc1f34d87a0d33a76a171f, type: 2}
@@ -759,6 +761,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 21c4cdd7952e86e4397612b587470405, type: 2}
   body: {fileID: 7660502697440113241}
   car: {fileID: 467143313492639092}
+  carController: {fileID: 0}
   speed: 0
 --- !u!1 &7531833160578058007
 GameObject:
@@ -905,8 +908,8 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 21c4cdd7952e86e4397612b587470405, type: 2}
-  - {fileID: 2100000, guid: 21c4cdd7952e86e4397612b587470405, type: 2}
+  - {fileID: 2100000, guid: 0f318c434e99fd941a6fe472546735ca, type: 2}
+  - {fileID: 2100000, guid: 0f318c434e99fd941a6fe472546735ca, type: 2}
   - {fileID: 2100000, guid: 41e1aec23123f8247ad9849e27213955, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
