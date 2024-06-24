@@ -41,6 +41,9 @@ public class UI_HUD : NetworkBehaviour
 
     [SerializeField] GameObject canvasLobby;
 
+    // Posición de carrera
+    [SerializeField] private TMP_Text posicionCarrera;
+
 
     private void Awake()
     {
@@ -87,6 +90,8 @@ public class UI_HUD : NetworkBehaviour
         ActualizarTemporizador(tiempoTotal, tTotal);
         ActualizarTemporizador(tiempoVuelta, tVuelta);
 
+        ActualizarPosicionCarrera();
+
     }
 
     public void ModificarVelocimetro(float velocidad)
@@ -130,6 +135,14 @@ public class UI_HUD : NetworkBehaviour
     [ClientRpc]
     private void ActualizarNumeroVueltasClientRpc(int vueltaActual, int playerIndex)
     {
+        // Se actualiza el número de vuelta del jugador correspondiente en la lista de jugadores, para poder actualizar bien las posiciones de carrera
+        foreach(PlayerNetwork player in RaceController.instance._players)
+        {
+            if(player.ID == playerIndex)
+            {
+                player.CurrentLap = vueltaActual;
+            }
+        }
         if (playerIndex != (int)NetworkManager.Singleton.LocalClientId) return;
         numeroVuelta.text = vueltaActual.ToString() + "/3";
         if (vueltaActual - 1 > 0)
@@ -278,6 +291,20 @@ public class UI_HUD : NetworkBehaviour
         int minutes = Mathf.FloorToInt(tiempo / 60F);
         int seconds = Mathf.FloorToInt(tiempo % 60F);
         texto.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+    }
+
+    private void ActualizarPosicionCarrera()
+    {
+        int posicion = 0;
+        foreach(PlayerNetwork player in RaceController.instance._players)
+        {
+            posicion++;
+            if(player.IsOwner)
+            {
+                posicionCarrera.text = posicion.ToString() + "º";
+                return;
+            }
+        }
     }
 
 }

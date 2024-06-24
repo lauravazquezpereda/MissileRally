@@ -270,6 +270,7 @@ public class CarController : MonoBehaviour
     {
         if(other.gameObject.tag == "Meta")
         {
+
             if(IsOwner)
             {
                 UI_HUD.Instance.AvanzarVuelta();

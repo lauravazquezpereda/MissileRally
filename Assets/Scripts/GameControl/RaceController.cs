@@ -48,7 +48,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
         } 
         if(carreraPreparada)
         {
-            // UpdateRaceProgress();
+            UpdateRaceProgress();
         }
     }
 
@@ -69,9 +69,25 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
 
         public override int Compare(PlayerNetwork x, PlayerNetwork y)
         {
-            if (_arcLengths[x.ID] < _arcLengths[y.ID])
+            // Va en una posición inferior aquel que lleva menos vueltas
+            if (x.CurrentLap < y.CurrentLap)
+            {
                 return 1;
-            else return -1;
+            }
+            else if (x.CurrentLap > y.CurrentLap)
+            {
+                return -1;
+            }
+            // Si están en la misma vuelta, se comprueba en qué posición se encuentran
+            else
+            {
+                if (_arcLengths[x.ID] < _arcLengths[y.ID])
+                {
+                    return 1;
+                }     
+                else return -1;
+            }
+
         }
     }
 
@@ -82,7 +98,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
 
         for (int i = 0; i < _players.Count; ++i)
         {
-            arcLengths[i] = ComputeCarArcLength(i);
+            arcLengths[_players[i].ID] = ComputeCarArcLength(i);
         }
 
 

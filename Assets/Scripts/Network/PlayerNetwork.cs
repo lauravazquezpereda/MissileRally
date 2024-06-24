@@ -1,5 +1,6 @@
 using Cinemachine;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Netcode;
 using UnityEditor;
@@ -22,8 +23,8 @@ public class PlayerNetwork : NetworkBehaviour
     // Controlador del coche 
     public CarController carController;
 
-    public int CurrentPosition { get; set; }
-    public int CurrentLap { get; set; }
+    public int CurrentPosition;
+    public int CurrentLap;
 
     // Velocidad
     public float speed;
@@ -40,6 +41,11 @@ public class PlayerNetwork : NetworkBehaviour
         // Con esto cogemos el ID del player para así tener la ID de la esfera y poder coger su posición
         carController = car.GetComponent<CarController>();
         ID = (int) OwnerClientId;
+
+        // Se obtiene el nombre del jugador
+        Dictionary<string, List<string>> datosJugadores = TestLobby.Instance.GetPlayersInLobby();
+        datosJugadores.TryGetValue("Nombres", out List<string> nombres);
+        Name = nombres[ID];
 
         // Al aparecer, se hace que la cámara siga al coche
         if (!IsOwner) return; // La camara sigue su propio objeto player no el de lo demás jugadores

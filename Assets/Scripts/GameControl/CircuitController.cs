@@ -14,7 +14,6 @@ public class CircuitController : MonoBehaviour
 
     public void StartCircuit()
     {
-        /*
         _circuitPath = GetComponentInChildren<LineRenderer>();
 
         int numPoints = _circuitPath.positionCount;
@@ -32,15 +31,14 @@ public class CircuitController : MonoBehaviour
         }
 
         _totalLength = _cumArcLength[_cumArcLength.Length - 1];
-        */
     }
 
-    public Vector3 GetSegment(int idx) //se genera el segmento del circuito que se necesite
+    public Vector3 GetSegment(int idx)
     {
         return _pathPos[idx + 1] - _pathPos[idx];
     }
 
-    public float ComputeClosestPointArcLength(Vector3 posIn, out int segIdx, out Vector3 posProjOut, out float distOut) //así se cual es mi orden
+    public float ComputeClosestPointArcLength(Vector3 posIn, out int segIdx, out Vector3 posProjOut, out float distOut)
     {
         int minSegIdx = 0;
         float minArcL = float.NegativeInfinity;
@@ -52,7 +50,6 @@ public class CircuitController : MonoBehaviour
         {
             Vector3 pathVec = (_pathPos[i + 1] - _pathPos[i]).normalized;
             float segLength = (_pathPos[i + 1] - _pathPos[i]).magnitude;
-
 
             Vector3 carVec = (posIn - _pathPos[i]);
             float dotProd = Vector3.Dot(carVec, pathVec);
@@ -74,10 +71,10 @@ public class CircuitController : MonoBehaviour
             }
         }
 
-        // If there was no valid projection check nodes
-        if (float.IsPositiveInfinity(minDist)) //minDist == float.PositiveInfinity
+        // If there was no valid projection, check nodes
+        if (float.IsPositiveInfinity(minDist))
         {
-            for (int i = 0; i < _pathPos.Length - 1; ++i)
+            for (int i = 0; i < _pathPos.Length; ++i)
             {
                 float dist = (posIn - _pathPos[i]).magnitude;
                 if (dist < minDist)
