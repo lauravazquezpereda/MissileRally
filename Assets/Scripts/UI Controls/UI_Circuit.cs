@@ -85,6 +85,25 @@ public class UI_Circuit : NetworkBehaviour
             }
 
             Debug.Log("Server selecting final circuit: " + mejorCircuito);
+
+            switch (mejorCircuito)
+            {
+                case 0:
+                    CheckPointManager.instance.checkPoints = CheckPointManager.instance.checkPoints1;
+                    break;
+                case 1:
+                    CheckPointManager.instance.checkPoints = CheckPointManager.instance.checkPoints2;
+                    break;
+                case 2:
+                    CheckPointManager.instance.checkPoints = CheckPointManager.instance.checkPoints3;
+                    break;
+                case 3:
+                    CheckPointManager.instance.checkPoints = CheckPointManager.instance.checkPoints4;
+                    break;
+            }
+
+            CheckPointManager.instance.TotalCheckPoints = CheckPointManager.instance.checkPoints.Count;
+
             circuitos[mejorCircuito].SetActive(true);
             canvas.SetActive(false);
             circuitoSeleccionado = circuito;
