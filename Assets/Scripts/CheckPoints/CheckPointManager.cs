@@ -26,7 +26,7 @@ public class CheckPointManager : MonoBehaviour
     // Conseguimos el índice del checkpoint
     public int GetCheckpointIndex(CheckPoint checkpoint)
     {
-        return checkPoints.IndexOf(checkpoint);
+       return checkPoints.IndexOf(checkpoint);
     }
 
     // Conseguimos la posición del punto de control

@@ -118,6 +118,24 @@ public class UI_Circuit : NetworkBehaviour
         circuitos[circuito].SetActive(true);
         finalizarMenu = true;
         circuitoSeleccionado = circuito;
+        // Dependiendo del circuito escogido, se asocia una lista de checkpoints u otra
+        switch (circuito)
+        {
+            case 0:
+                CheckPointManager.instance.checkPoints = CheckPointManager.instance.checkPoints1;
+                break;
+            case 1:
+                CheckPointManager.instance.checkPoints = CheckPointManager.instance.checkPoints2;
+                break;
+            case 2:
+                CheckPointManager.instance.checkPoints = CheckPointManager.instance.checkPoints3;
+                break;
+            case 3:
+                CheckPointManager.instance.checkPoints = CheckPointManager.instance.checkPoints4;
+                break;
+        }
+
+        CheckPointManager.instance.TotalCheckPoints = CheckPointManager.instance.checkPoints.Count;
     }
 
     public void MostrarMenu()

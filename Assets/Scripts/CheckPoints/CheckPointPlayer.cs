@@ -28,4 +28,11 @@ public class CheckPointPlayer : NetworkBehaviour
         Vector3 lastCheckpointPosition = CheckPointManager.instance.GetCheckpointPosition(currentCheckPointIndex); // Coge la posición del último checkpoint
         transform.position = lastCheckpointPosition;
     }
+
+    [ClientRpc]
+    public void OnCheckPointPassedClientRpc(int checkPointIndex)
+    {
+        if (!IsOwner) return;
+        OnCheckPointPassedServerRpc(checkPointIndex);
+    }
 }

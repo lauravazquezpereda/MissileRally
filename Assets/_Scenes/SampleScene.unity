@@ -1681,7 +1681,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 217953122}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -42.2, y: -56.7, z: -150.29}
+  m_LocalPosition: {x: -42.2, y: -56.7, z: -152.74}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12497,7 +12497,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1518334026}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -42.2, y: -56.7, z: -126.2}
+  m_LocalPosition: {x: -42.2, y: -56.7, z: -131.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15837,7 +15837,6 @@ GameObject:
   - component: {fileID: 2048798584}
   - component: {fileID: 2048798585}
   - component: {fileID: 2048798587}
-  - component: {fileID: 2048798586}
   m_Layer: 0
   m_Name: CheckPoints5
   m_TagString: Untagged
@@ -15881,18 +15880,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 30, y: 30, z: 75}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2048798586
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2048798583}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bb9e4aaaa4d5a734c8c0925532f971d8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2048798587
 MonoBehaviour:
   m_ObjectHideFlags: 0
