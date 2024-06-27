@@ -6,7 +6,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
     public int numPlayers;
 
     [SerializeField] public List<PlayerNetwork> _players = new(4); //lista de jugadores
-    [SerializeField] private CircuitController _circuitController;
+    public CircuitController _circuitController;
     public GameObject[] _debuggingSpheres; //esferas que acompañan 
 
     public static RaceController instance;
@@ -32,6 +32,8 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
         {
             _debuggingSpheres[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             _debuggingSpheres[i].GetComponent<SphereCollider>().enabled = false;
+            // Hacer la esfera invisible desactivando el componente MeshRenderer
+            _debuggingSpheres[i].GetComponent<MeshRenderer>().enabled = false;
         }
     }
 
@@ -139,7 +141,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
         return minArcL;
     }
 
-    private void ModificarColorCoches()
+    public void ModificarColorCoches()
     {
         // Corregir el color de los coches
 

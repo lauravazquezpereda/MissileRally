@@ -171,7 +171,7 @@ public class UI_Circuit : NetworkBehaviour
     }
 
     // Se reinician las vueltas, en caso de que al colocar los players, alguno haya travesado la línea de meta
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void ReinicializarVueltasServerRpc()
     {
         // Inicializar el array de vueltas
@@ -187,6 +187,31 @@ public class UI_Circuit : NetworkBehaviour
         {
             UI_HUD.Instance.tiemposVueltaJugadores[i] = 0;
         }
+    }
+
+    public void ResetState()
+    {
+        botonAceptar.SetActive(false); // Hasta que no se seleccione un nuevo circuito no se puede continuar
+        textoEspera.SetActive(false);
+        opcionEnviada = false;
+        finalizarMenu = false;
+        // Se ocultan todos los circuitos
+        for (int i = 0; i < 4; i++)
+        {
+            circuitos[i].SetActive(false);
+        }
+        // Se repite el proceso de selección de circuito
+        numSelecciones = 0;
+        // Se reinician los votos
+        for (int i = 0; i < 4; i++)
+        {
+            circuitosEscogidos[i] = 0;
+        }
+        // Se resetea también el estado de la carrera
+        RaceController.instance.ModificarColorCoches();
+        RaceController.instance._circuitController.StartCircuit();
+        EndingController.Instance.carreraFinalizada = false;
+        UI_HUD.Instance.ResetState();
     }
 
 }

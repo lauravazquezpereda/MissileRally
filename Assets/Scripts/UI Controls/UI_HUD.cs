@@ -20,8 +20,8 @@ public class UI_HUD : NetworkBehaviour
     [SerializeField] TMP_Text tiempoTotal;
     [SerializeField] TMP_Text tiempoVuelta;
 
-    private float tTotal;
-    private float tVuelta;
+    public float tTotal;
+    public float tVuelta;
 
     public bool inicioCarrera = false;
     public bool vueltasInicializadas = false;
@@ -188,7 +188,7 @@ public class UI_HUD : NetworkBehaviour
         if (pos1 != -1)
         {
             float tiempoTotal = 0;
-            for(int i = pos1; i < pos1 + 3; i++)
+            for(int i = pos1*3; i < pos1 + 3; i++)
             {
                 tiempoTotal += tiemposVueltaJugador.Values[i];
             }
@@ -202,7 +202,7 @@ public class UI_HUD : NetworkBehaviour
         if(pos2 != -1)
         {
             float tiempoTotal = 0;
-            for (int i = pos2; i < pos2 + 3; i++)
+            for (int i = pos2*3; i < pos2 + 3; i++)
             {
                 tiempoTotal += tiemposVueltaJugador.Values[i];
                 if (tiemposVueltaJugador.Values[i] == 0)
@@ -226,7 +226,7 @@ public class UI_HUD : NetworkBehaviour
         if(pos3 != -1)
         {
             float tiempoTotal = 0;
-            for (int i = pos3; i < pos3 + 3; i++)
+            for (int i = pos3*3; i < pos3 + 3; i++)
             {
                 tiempoTotal += tiemposVueltaJugador.Values[i];
                 if (tiemposVueltaJugador.Values[i] == 0)
@@ -278,6 +278,9 @@ public class UI_HUD : NetworkBehaviour
             numVuelta++;
         }
 
+        // Se eliminan los coches
+        EliminarCoches();
+
     }
 
     public void VolverLobby()
@@ -305,6 +308,38 @@ public class UI_HUD : NetworkBehaviour
                 return;
             }
         }
+    }
+
+    private void EliminarCoches()
+    {
+        if (!NetworkManager.Singleton.IsServer) return;
+        // Se obtienen todos los objetos player de la escena, para eliminarlos
+        GameObject[] carPlayers = GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (GameObject carPlayer in carPlayers)
+        {
+            if (carPlayer != null && carPlayer.GetComponent<NetworkObject>().IsSpawned)
+            {
+                carPlayer.GetComponent<NetworkObject>().Despawn(true); // True para destruir el objeto en todas las instancias
+            }
+        }
+
+        // Se limpia la lista
+        RaceController.instance._players.Clear();
+    }
+
+    public void ResetState()
+    {
+        tTotal = 0f;
+        tVuelta = 0f;
+        inicioCarrera = false;
+        vueltasInicializadas = false;
+        for (int i = 0; i < elementoHUD.Length; i++)
+        {
+            elementoHUD[i].SetActive(true);
+        }
+        textoEsperaFinal.SetActive(false);
+
     }
 
 }
