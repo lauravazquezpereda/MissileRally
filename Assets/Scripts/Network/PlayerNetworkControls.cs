@@ -38,11 +38,12 @@ public class PlayerNetworkControls : NetworkBehaviour
             }
             return;
         }
-        
-        // Captura la entrada de aceleración y dirección
-        float acceleration = Input.GetAxis("Vertical");
-        float steering = Input.GetAxis("Horizontal");
+        float acceleration, steering;
 
+        // Captura la entrada de aceleración y dirección
+        acceleration = Input.GetAxis("Vertical");
+        steering = Input.GetAxis("Horizontal");
+        
         // Procesa el movimiento del coche en el servidor
         ProcessMovementServerRpc(acceleration, steering, carController.ID);
 

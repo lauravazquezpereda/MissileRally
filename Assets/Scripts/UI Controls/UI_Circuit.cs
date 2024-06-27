@@ -136,6 +136,8 @@ public class UI_Circuit : NetworkBehaviour
         }
 
         CheckPointManager.instance.TotalCheckPoints = CheckPointManager.instance.checkPoints.Count;
+        StartCoroutine(StartingSequence());
+
     }
 
     public void MostrarMenu()
@@ -148,8 +150,43 @@ public class UI_Circuit : NetworkBehaviour
     {
         // Antes de ocultar el menú, se spawnean los coches
         NetManager.instance.circuitoSeleccionado = circuitoSeleccionado;
-        NetManager.instance.GeneratePlayersInCircuit();
         canvas.SetActive(false);
+    }
+
+    private IEnumerator StartingSequence()
+    {
+        // Fundido a negro
+        yield return StartCoroutine(FadeController.instance.FadeOut());
+
+        // Se generan los clientes (players)
+        NetManager.instance.GeneratePlayersInCircuit();
+
+        // Esperar tres segundos
+        yield return new WaitForSeconds(2f);
+
+        // Fundido desde negro
+        yield return StartCoroutine(FadeController.instance.FadeIn());
+
+        ReinicializarVueltasServerRpc();
+    }
+
+    // Se reinician las vueltas, en caso de que al colocar los players, alguno haya travesado la línea de meta
+    [ServerRpc]
+    private void ReinicializarVueltasServerRpc()
+    {
+        // Inicializar el array de vueltas
+        UI_HUD.Instance.vueltasJugadores = new int[TestLobby.Instance.NUM_PLAYERS_IN_LOBBY];
+        for (int i = 0; i < TestLobby.Instance.NUM_PLAYERS_IN_LOBBY; i++)
+        {
+            UI_HUD.Instance.vueltasJugadores[i] = 0;
+        }
+
+        // Inicializar el array de los tiempos de cada vuelta, cada jugador dará 3 vueltas
+        UI_HUD.Instance.tiemposVueltaJugadores = new float[TestLobby.Instance.NUM_PLAYERS_IN_LOBBY * 3];
+        for (int i = 0; i < TestLobby.Instance.NUM_PLAYERS_IN_LOBBY * 3; i++)
+        {
+            UI_HUD.Instance.tiemposVueltaJugadores[i] = 0;
+        }
     }
 
 }

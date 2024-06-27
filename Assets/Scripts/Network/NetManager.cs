@@ -7,7 +7,7 @@ public class NetManager : MonoBehaviour
 {
     public static NetManager instance;
 
-    [SerializeField] private List<Transform> posCoche;
+    public List<Transform> posCoche;
     [SerializeField] private GameObject playerPrefab;
 
     public int circuitoSeleccionado;
@@ -52,11 +52,15 @@ public class NetManager : MonoBehaviour
 
     public void SpawnCar(ulong clientId)
     {
-        Vector3 spawnPosition = posCoche[(int)clientId + (circuitoSeleccionado * NUM_CIRCUITOS)].position; // posición en la que spawnea el coche - se tiene en cuenta el circuito escogido, ya que las posiciones están ordenadas
+        if (NetworkManager.Singleton.IsServer)
+        {
+            Vector3 spawnPosition = posCoche[(int)clientId + (circuitoSeleccionado * NUM_CIRCUITOS)].position;
+            Quaternion spawnRotation = Quaternion.identity;
 
-        //Instanciamos el objeto en la escena en la posición de arriba
-        GameObject playerObj = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
-        playerObj.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
+            GameObject playerObj = Instantiate(playerPrefab, spawnPosition, spawnRotation);
+            playerObj.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+
+        }
 
     }
 

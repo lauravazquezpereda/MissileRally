@@ -15,6 +15,8 @@ public class CheckPointManager : MonoBehaviour
     public List<CheckPoint> checkPoints3;
     public List<CheckPoint> checkPoints4;
 
+    public GameObject fundidoNegro;
+
     public void Awake()
     {
         if(instance == null)
@@ -33,5 +35,10 @@ public class CheckPointManager : MonoBehaviour
     public Vector3 GetCheckpointPosition(int index)
     {
         return checkPoints[index].transform.position;
+    }
+
+    public Quaternion GetCheckpointRotation(int index)
+    {
+        return checkPoints[index].transform.rotation;
     }
 }

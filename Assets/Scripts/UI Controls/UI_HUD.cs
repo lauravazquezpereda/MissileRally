@@ -24,10 +24,10 @@ public class UI_HUD : NetworkBehaviour
     private float tVuelta;
 
     public bool inicioCarrera = false;
-    private bool vueltasInicializadas = false;
+    public bool vueltasInicializadas = false;
 
     // Se almacenan las vueltas de los jugadores en el servidor
-    [SerializeField] private int[] vueltasJugadores;
+    public int[] vueltasJugadores;
     public float[] tiemposVueltaJugadores;
 
     [SerializeField] private GameObject canvasTiemposFinal;

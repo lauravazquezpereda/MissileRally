@@ -38,6 +38,13 @@ public class CarController : MonoBehaviour
 
     public float _currentSpeed = 0;
 
+    private const float VELOCIDAD_MINIMA = 0.1f;
+    private const float MAX_TIEMPO_VOLCADO = 2f;
+    private const float MAX_TIEMPO_ATASCADO = 5f;
+    public float tiempoParado = 0f;
+
+
+
     public bool IsOwner = false; // Esta variable se encarga de indicar si el coche es del cliente que está jugando
 
     private float Speed
@@ -56,6 +63,9 @@ public class CarController : MonoBehaviour
 
     public event OnSpeedChangeDelegate OnSpeedChangeEvent;
 
+    // Lista de colliders de las ruedas, para detectar si se sale fuera del circuito
+    public List<WheelCollider> wheelColliders;
+
     #endregion Variables
 
     #region Unity Callbacks
@@ -68,6 +78,30 @@ public class CarController : MonoBehaviour
     public void Update()
     {
         Speed = _rigidbody.velocity.magnitude;
+        // COMPROBACIÓN DE SI EL COCHE SE HA QUEDADO INMOVILIZADO POR UN CHOQUE O POR HABER VOLCADO
+        if(Speed <= VELOCIDAD_MINIMA && !this.isDumped)
+        {
+            tiempoParado+= Time.deltaTime;
+            if(tiempoParado >= MAX_TIEMPO_VOLCADO)
+            {
+                CheckDump();
+            }
+            if(tiempoParado >= MAX_TIEMPO_ATASCADO)
+            {
+                tiempoParado = 0f;
+                CheckPointPlayer checkPoint = GetComponent<CheckPointPlayer>();
+                if (checkPoint != null)
+                {
+                    checkPoint.OnCheckPointPassedServerRpc(-1, ID);
+                }
+            }
+        }
+        else
+        {
+            tiempoParado = 0f;
+        }
+
+        OutOfCircuit();
     }
 
     public void FixedUpdate() //logica de conducir
@@ -232,25 +266,13 @@ public class CarController : MonoBehaviour
         if (Math.Abs(transform.rotation.eulerAngles.z) > 50 && !waiting && !EndingController.Instance.carreraFinalizada)
         {
             this.isDumped = true;
+            tiempoParado = 0f;
         } 
     }
 
-    // Comprueba la colisión si ha sido con la carretera
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.tag == "Carretera" || collision.gameObject.tag == "Cesped")
-        {
-            CheckDump();
-        }
-    }
 
-    // Recupera la posición que tenia el coche antes de volcarse
-    private void ResetPosition()
+    private void ResetRotation()
     {
-        // Aquí cogemos la posición de la esfera que esta en GameManager, accediendo a RaceController
-        Vector3 PositionReset = GameManager.Instance.currentRace._debuggingSpheres[ID].transform.position;
-        transform.position = PositionReset;
-
         // Aquí cogemos la rotación de la esfera que esta en GameManager, accediendo a RaceController
         Quaternion RotationReset = GameManager.Instance.currentRace._debuggingSpheres[ID].transform.rotation;
         transform.rotation = RotationReset;
@@ -258,13 +280,58 @@ public class CarController : MonoBehaviour
         waiting = false;
     }
 
+
     // Corutina para esperar 3 segundos antes de volver a la posición una vez volcado
     private IEnumerator WaitForReset()
     {
         waiting = true;
-        yield return new WaitForSeconds(3f);
-        ResetPosition();
+        yield return new WaitForSeconds(1f);
+        ResetRotation();
+        // Se va a la posición del último checkpoint visitado
+        CheckPointPlayer checkPoint = GetComponent<CheckPointPlayer>();
+        if (checkPoint != null)
+        {
+            checkPoint.OnCheckPointPassedServerRpc(-1, ID);
+            waiting = false;
+        }
     }
+
+    private void OutOfCircuit()
+    {
+        // Para cada una de las ruedas, se detecta si están en contacto con terreno que no pertenece a la carretera del circuito. Con que haya una mal, se reinicia la posición del coche
+        foreach (WheelCollider wheelCollider in wheelColliders)
+        {
+            if(DetectCollision(wheelCollider)) return;
+        }
+    }
+
+    private bool DetectCollision(WheelCollider wheelCollider)
+    {
+        RaycastHit hit;
+        Vector3 wheelPosition;
+        Quaternion wheelRotation;
+
+        // Obtener la posición actual de la rueda
+        wheelCollider.GetWorldPose(out wheelPosition, out wheelRotation);
+
+        // Realizar un Raycast desde la posición de la rueda hacia el suelo
+        if (Physics.Raycast(wheelPosition, -wheelCollider.transform.up, out hit, 0.5f))
+        {
+            if(hit.collider.tag == "Arena" || hit.collider.tag == "Cesped")
+            {
+                Debug.Log("Fuera del circuito");
+                // Se va a la posición del último checkpoint visitado, ya que, se está intentando saltar parte del circuito
+                CheckPointPlayer checkPoint = GetComponent<CheckPointPlayer>();
+                if (checkPoint != null)
+                {
+                    checkPoint.OnCheckPointPassedServerRpc(-1, ID);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     public void OnTriggerEnter(Collider other)
     {
