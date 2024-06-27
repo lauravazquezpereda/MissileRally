@@ -85,7 +85,7 @@ public class UI_Circuit : NetworkBehaviour
             }
 
             Debug.Log("Server selecting final circuit: " + mejorCircuito);
-
+            // Dependiendo del circuito escogido, se asocia una lista de checkpoints u otra
             switch (mejorCircuito)
             {
                 case 0:

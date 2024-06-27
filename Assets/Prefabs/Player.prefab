@@ -525,7 +525,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04bbeed5ca78608429c21c26ff5e4794, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentCheckPointIndex: 0
+  currentCheckPointIndex: -1
 --- !u!1 &3791769780387774050
 GameObject:
   m_ObjectHideFlags: 0
@@ -755,8 +755,8 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e01835458edd3f245a4d3d219ca2735c, type: 2}
-  - {fileID: 2100000, guid: e01835458edd3f245a4d3d219ca2735c, type: 2}
+  - {fileID: 2100000, guid: 0f318c434e99fd941a6fe472546735ca, type: 2}
+  - {fileID: 2100000, guid: 0f318c434e99fd941a6fe472546735ca, type: 2}
   - {fileID: 2100000, guid: 41e1aec23123f8247ad9849e27213955, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0

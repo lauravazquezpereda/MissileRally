@@ -7,7 +7,8 @@ public class CheckPointManager : MonoBehaviour
     public static CheckPointManager instance;
     public int TotalCheckPoints = 0;
 
-    //una lista de checkPoints por cada circuito
+    // Una lista de checkPoints por cada circuito
+    // Dependiendo del circuito escogido, se seleccionan unos u otros
     public List<CheckPoint> checkPoints;
     public List<CheckPoint> checkPoints1;
     public List<CheckPoint> checkPoints2;
@@ -22,13 +23,13 @@ public class CheckPointManager : MonoBehaviour
         }
     }
 
-    //Conseguimos el índice del checkpoint
+    // Conseguimos el índice del checkpoint
     public int GetCheckpointIndex(CheckPoint checkpoint)
     {
         return checkPoints.IndexOf(checkpoint);
     }
 
-    //Conseguimos la posición del punto de control
+    // Conseguimos la posición del punto de control
     public Vector3 GetCheckpointPosition(int index)
     {
         return checkPoints[index].transform.position;

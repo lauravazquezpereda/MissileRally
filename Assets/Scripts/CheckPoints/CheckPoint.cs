@@ -8,7 +8,7 @@ public class CheckPoint : MonoBehaviour
     {
         CheckPointPlayer playerCheckpointManager = other.GetComponent<CheckPointPlayer>();
 
-        //cada vez que se entra en el Trigger de un checkPoint, se llama al método del Player para comprobar que es el correcto
+        // Cada vez que se entra en el Trigger de un checkPoint, se llama al método del Player para comprobar que es el correcto
         if (playerCheckpointManager != null)
         {
             playerCheckpointManager.OnCheckPointPassedServerRpc(CheckPointManager.instance.GetCheckpointIndex(this));
