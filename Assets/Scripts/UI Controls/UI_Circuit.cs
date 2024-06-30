@@ -23,6 +23,8 @@ public class UI_Circuit : NetworkBehaviour
     private bool opcionEnviada = false;
     public bool finalizarMenu = false;
 
+    private bool reiniciarCarrera = false;
+
     private void Awake()
     {
         if (instance == null)
@@ -161,32 +163,18 @@ public class UI_Circuit : NetworkBehaviour
         // Se generan los clientes (players)
         NetManager.instance.GeneratePlayersInCircuit();
 
-        // Esperar tres segundos
+        // Esperar dos segundos en el fundido
         yield return new WaitForSeconds(2f);
-
+        // Si se está reiniciando la carrera, se vuelven a modificar los colores de los coches en función de lo escogido por cada jugador
+        if(reiniciarCarrera)
+        {
+            ResetearCircuitoColores();
+        }
+        // En la vuelta de clasificación, no se van a tener en cuenta las colisiones entre los coches. Esto se habilitará después, una vez empiece la carrera en sí
+        NetManager.instance.IgnorarColisionesEntreJugadores(true);
         // Fundido desde negro
         yield return StartCoroutine(FadeController.instance.FadeIn());
 
-        ReinicializarVueltasServerRpc();
-    }
-
-    // Se reinician las vueltas, en caso de que al colocar los players, alguno haya travesado la línea de meta
-    [ServerRpc(RequireOwnership = false)]
-    private void ReinicializarVueltasServerRpc()
-    {
-        // Inicializar el array de vueltas
-        UI_HUD.Instance.vueltasJugadores = new int[TestLobby.Instance.NUM_PLAYERS_IN_LOBBY];
-        for (int i = 0; i < TestLobby.Instance.NUM_PLAYERS_IN_LOBBY; i++)
-        {
-            UI_HUD.Instance.vueltasJugadores[i] = 0;
-        }
-
-        // Inicializar el array de los tiempos de cada vuelta, cada jugador dará 3 vueltas
-        UI_HUD.Instance.tiemposVueltaJugadores = new float[TestLobby.Instance.NUM_PLAYERS_IN_LOBBY * 3];
-        for (int i = 0; i < TestLobby.Instance.NUM_PLAYERS_IN_LOBBY * 3; i++)
-        {
-            UI_HUD.Instance.tiemposVueltaJugadores[i] = 0;
-        }
     }
 
     public void ResetState()
@@ -207,11 +195,22 @@ public class UI_Circuit : NetworkBehaviour
         {
             circuitosEscogidos[i] = 0;
         }
+        EndingController.Instance.carreraFinalizada = false;
+        EndingController.Instance.ordenFinal.Clear();
+        if (!RaceController.instance.clasificacion)
+        {
+            UI_HUD.Instance.ResetState();
+        }
+        UI_Clasificacion.instance.ResetState();
+        reiniciarCarrera = true;
+    }
+
+    private void ResetearCircuitoColores()
+    {
         // Se resetea también el estado de la carrera
         RaceController.instance.ModificarColorCoches();
         RaceController.instance._circuitController.StartCircuit();
-        EndingController.Instance.carreraFinalizada = false;
-        UI_HUD.Instance.ResetState();
+        reiniciarCarrera = false;
     }
 
 }

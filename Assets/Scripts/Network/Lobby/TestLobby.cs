@@ -58,6 +58,7 @@ public class TestLobby : MonoBehaviour
         };
 
         StartCoroutine(UpdateLobby());
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
     }
 
     private void Update()
@@ -360,6 +361,34 @@ public class TestLobby : MonoBehaviour
                 yield return new WaitForSeconds(1f);
             }
         }
+    }
+
+    public async void ReiniciarEsperaHost()
+    {
+        // Actualizar el lobby para indicar que el juego ha comenzado
+        var data = new Dictionary<string, PlayerDataObject>
+            {
+                { "HostStarted", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, "false") }
+            };
+
+        var options = new UpdatePlayerOptions
+        {
+            Data = data
+        };
+
+        await LobbyService.Instance.UpdatePlayerAsync(joinedLobby.Id, AuthenticationService.Instance.PlayerId, options);
+    }
+
+    public void OnClientDisconnected(ulong clientId)
+    {
+        int idNulo = 0;
+        for(int i=0; i<RaceController.instance._players.Count; i++)
+        {
+            if (RaceController.instance._players[i] == null) {
+                idNulo = i;
+            }
+        }
+        RaceController.instance._players.Remove(RaceController.instance._players[idNulo]);
     }
 
 }

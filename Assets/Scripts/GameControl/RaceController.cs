@@ -11,8 +11,12 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
 
     public static RaceController instance;
 
+    public bool clasificacion = true;
+
     public bool carreraIniciada = false;
     public bool carreraPreparada = false;
+
+    public List<int> posiciones = new(4);
 
     private void Awake()
     {
@@ -51,6 +55,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
         if(carreraPreparada)
         {
             UpdateRaceProgress();
+            OrderPositions();
         }
     }
 
@@ -95,6 +100,10 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
 
     public void UpdateRaceProgress()
     {
+
+        if (_players.Count == 0)
+            return;
+
         // Update car arc-lengths
         float[] arcLengths = new float[_players.Count];
 
@@ -150,7 +159,8 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
 
         for (int i = 0; i < TestLobby.Instance.NUM_PLAYERS_IN_LOBBY; i++)
         {
-            string color = colores[i];
+            Debug.Log(colores[_players[i].ID]);
+            string color = colores[_players[i].ID]; // Se obtiene el color del ID del jugador, debido a que están ordenados de esta forma en la lista
             switch (color)
             {
                 case "red":
@@ -169,6 +179,17 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
                     _players[i].SetColor(4);
                     break;
             }
+        }
+    }
+
+    public void OrderPositions()
+    {
+        // Con esta función se obtienen los ID de los jugadores en orden de posición
+        // Esto se va a utilizar para implementar la funcionalidad de Rubber Band
+        posiciones.Clear();
+        foreach (PlayerNetwork player in _players)
+        {
+            posiciones.Add(player.ID);
         }
     }
 }

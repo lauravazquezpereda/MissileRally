@@ -29,6 +29,9 @@ public class PlayerNetwork : NetworkBehaviour
     // Velocidad
     public float speed;
 
+    // Modelo del coche
+    public GameObject[] modeloCoche;
+
     public override string ToString()
     {
         return Name;
@@ -46,6 +49,10 @@ public class PlayerNetwork : NetworkBehaviour
         Dictionary<string, List<string>> datosJugadores = TestLobby.Instance.GetPlayersInLobby();
         datosJugadores.TryGetValue("Nombres", out List<string> nombres);
         Name = nombres[ID];
+        if (RaceController.instance.clasificacion)
+        {
+            InvisibilizarCoches();
+        }
 
         // Al aparecer, se hace que la cámara siga al coche
         if (!IsOwner) return; // La camara sigue su propio objeto player no el de lo demás jugadores
@@ -70,6 +77,27 @@ public class PlayerNetwork : NetworkBehaviour
 
         meshRendererBody.sharedMaterials = materialAntiguo;
     }
-}
 
-//para agregarme a la carrera solo tengo que aparecer
+    public void InvisibilizarCoches()
+    {
+        if (!IsOwner)
+        {
+            foreach(GameObject g in modeloCoche)
+            {
+                g.GetComponentInChildren<MeshRenderer>().enabled = false;
+            }
+
+        }
+    }
+
+    public void VisibilizarCoches()
+    {
+        if (!IsOwner)
+        {
+            foreach (GameObject g in modeloCoche)
+            {
+                g.GetComponentInChildren<MeshRenderer>().enabled = true;
+            }
+        }
+    }
+}

@@ -6,10 +6,20 @@ using UnityEngine;
 public class CheckPointPlayer : NetworkBehaviour
 {
     public int currentCheckPointIndex = 0;
+    public bool restaurandoPosicion = false;
 
     [ServerRpc(RequireOwnership = false)]
     public void OnCheckPointPassedServerRpc(int checkPointIndex, int id)
     {
+        // Se comprueba que el coche no esté detenido esperando a que acabe la carrera o la clasificación
+        CarController carController = GetComponent<CarController>();
+        if(carController != null)
+        {
+            if(carController.esperandoClasificacion)
+            {
+                return;
+            }
+        }
         // Se detecta que el coche está parado, pero como no se ha comenzado a mover, no se traslada
         if(checkPointIndex == -1 && currentCheckPointIndex == -1)
         {
@@ -44,12 +54,15 @@ public class CheckPointPlayer : NetworkBehaviour
         {
             transform.position = posicion;
             // Solo se hace el fundido si se trata del coche del propietario del juego
+            // Se evita que se haga varias veces
+            if (restaurandoPosicion) return;
             StartCoroutine(RespawnSequence(posicion, rotacion));
         }
         else if((int)OwnerClientId == id)
         {
             // Reposicionar el coche
             CarController car = GetComponent<CarController>();
+            car._rigidbody.velocity = Vector3.zero;
             car.InputAcceleration = 0;
             car.InputSteering = 0;
             car._currentSpeed = 0;
@@ -60,11 +73,13 @@ public class CheckPointPlayer : NetworkBehaviour
 
     private IEnumerator RespawnSequence(Vector3 posicion, Quaternion rotacion)
     {
+        restaurandoPosicion = true;
         // Fundido a negro
         yield return StartCoroutine(FadeController.instance.FadeOut());
 
         // Reposicionar el coche
         CarController car = GetComponent<CarController>();
+        car._rigidbody.velocity = Vector3.zero;
         car.InputAcceleration = 0;
         car.InputSteering = 0;
         car._currentSpeed = 0;
@@ -76,19 +91,22 @@ public class CheckPointPlayer : NetworkBehaviour
 
         // Fundido desde negro
         yield return StartCoroutine(FadeController.instance.FadeIn());
+        restaurandoPosicion = false;
     }
 
     private IEnumerator RespawnSequenceServer(Vector3 posicion, Quaternion rotacion)
     {
+        restaurandoPosicion = true;
         yield return new WaitForSeconds(2f);
         // Reposicionar el coche
         CarController car = GetComponent<CarController>();
+        car._rigidbody.velocity = Vector3.zero;
         car.InputAcceleration = 0;
         car.InputSteering = 0;
         car._currentSpeed = 0;
         transform.position = posicion;
         transform.rotation = rotacion;
-
+        restaurandoPosicion = false;
     }
 
 

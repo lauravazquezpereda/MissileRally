@@ -32,7 +32,7 @@ public class CarController : MonoBehaviour
 
     // private PlayerInfo m_PlayerInfo;
 
-    private Rigidbody _rigidbody;
+    public Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;
 
 
@@ -47,6 +47,8 @@ public class CarController : MonoBehaviour
 
     public bool IsOwner = false; // Esta variable se encarga de indicar si el coche es del cliente que está jugando
 
+    public bool esperandoClasificacion = false;
+    public bool clasificacionIniciada = false;
     private float Speed
     {
         get => _currentSpeed;
@@ -66,6 +68,9 @@ public class CarController : MonoBehaviour
     // Lista de colliders de las ruedas, para detectar si se sale fuera del circuito
     public List<WheelCollider> wheelColliders;
 
+    // Gestión del rubber band
+    public float factorAceleracion;
+
     #endregion Variables
 
     #region Unity Callbacks
@@ -77,9 +82,18 @@ public class CarController : MonoBehaviour
 
     public void Update()
     {
+        if(!RaceController.instance.clasificacion)
+        {
+            esperandoClasificacion = false;
+        }
         Speed = _rigidbody.velocity.magnitude;
+        // Se mantiene al coche quieto
+        if(esperandoClasificacion)
+        {
+            _rigidbody.velocity = Vector3.zero;
+        }
         // COMPROBACIÓN DE SI EL COCHE SE HA QUEDADO INMOVILIZADO POR UN CHOQUE O POR HABER VOLCADO
-        if(Speed <= VELOCIDAD_MINIMA && !this.isDumped)
+        if(Speed <= VELOCIDAD_MINIMA && !this.isDumped && !esperandoClasificacion)
         {
             tiempoParado+= Time.deltaTime;
             if(tiempoParado >= MAX_TIEMPO_VOLCADO)
@@ -102,12 +116,15 @@ public class CarController : MonoBehaviour
         }
 
         OutOfCircuit();
+        RubberBand();
     }
 
     public void FixedUpdate() //logica de conducir
     {
         InputSteering = Mathf.Clamp(InputSteering, -1, 1);
         InputAcceleration = Mathf.Clamp(InputAcceleration, -1, 1);
+        // Se aplica el rubber band
+        InputAcceleration *= factorAceleracion;
         InputBrake = Mathf.Clamp(InputBrake, 0, 1);
 
         float steering = maxSteeringAngle * InputSteering;
@@ -270,23 +287,11 @@ public class CarController : MonoBehaviour
         } 
     }
 
-
-    private void ResetRotation()
-    {
-        // Aquí cogemos la rotación de la esfera que esta en GameManager, accediendo a RaceController
-        Quaternion RotationReset = GameManager.Instance.currentRace._debuggingSpheres[ID].transform.rotation;
-        transform.rotation = RotationReset;
-        transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, 180f+transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
-        waiting = false;
-    }
-
-
     // Corutina para esperar 3 segundos antes de volver a la posición una vez volcado
     private IEnumerator WaitForReset()
     {
         waiting = true;
         yield return new WaitForSeconds(1f);
-        ResetRotation();
         // Se va a la posición del último checkpoint visitado
         CheckPointPlayer checkPoint = GetComponent<CheckPointPlayer>();
         if (checkPoint != null)
@@ -337,12 +342,97 @@ public class CarController : MonoBehaviour
     {
         if(other.gameObject.tag == "Meta")
         {
-
             if(IsOwner)
             {
-                UI_HUD.Instance.AvanzarVuelta();
+                if(RaceController.instance.clasificacion)
+                {
+                    if(!clasificacionIniciada)
+                    {
+                        clasificacionIniciada = true;
+                        UI_Clasificacion.instance.EmpezarTemporizador();
+                    }
+                    else if(clasificacionIniciada && !esperandoClasificacion)
+                    {
+                        UI_Clasificacion.instance.AvanzarVuelta();
+                        _rigidbody.velocity = Vector3.zero; // Se frena al coche
+                        esperandoClasificacion = true;
+                    }
+                }
+                else
+                {
+                    UI_HUD.Instance.AvanzarVuelta();
+                }
             }
         } 
     }
+
+    private void RubberBand()
+    {
+        // Solo se aplica esto en la carrera, no tiene sentido hacerlo durante la clasificación
+        if (RaceController.instance.clasificacion) factorAceleracion = 1;
+        int miPosicion = -1;
+        // Primero se calcula la posición en la que estás
+        for(int i=0; i<RaceController.instance.posiciones.Count; i++)
+        {
+            if (RaceController.instance.posiciones[i] == ID)
+            {
+                miPosicion = i;
+            }
+        }
+
+        switch(TestLobby.Instance.NUM_PLAYERS_IN_LOBBY)
+        {
+            case 2:
+                // Si hay dos jugadores, se aumenta ligeramente la velocidad del último y se disminuye ligeramente la velocidad del primero
+                // Si voy primero:
+                if(miPosicion == 1)
+                {
+                    factorAceleracion = 0.9f;
+                }
+                // Si voy segundo:
+                else
+                {
+                    factorAceleracion = 1.1f;
+                }
+                break;
+            case 3:
+                // Si hay tres jugadores, se aumenta ligeramente la velocidad del último, el segundo permanece tal cual y se disminuye ligeramente la velocidad del primero 
+                // Si voy primero:
+                if (miPosicion == 1)
+                {
+                    factorAceleracion = 0.9f;
+                }
+                else if (miPosicion == 2)
+                {
+                    factorAceleracion = 1f;
+                }
+                // Si voy segundo no se modifica la velocidad
+                else if (miPosicion == 3)
+                {
+                    factorAceleracion = 1.1f;
+                }
+                break;
+            case 4:
+                // Si hay cuatro jugadores, se aumenta ligeramente la velocidad del último, el tercero permanece tal cual, el segundo disminuye ligeramente y el primero un poco más
+                if (miPosicion == 1)
+                {
+                    factorAceleracion = 0.7f;
+                }
+                else if (miPosicion == 2)
+                {
+                    factorAceleracion = 0.9f;
+                }
+                else if (miPosicion == 3)
+                {
+                    factorAceleracion = 1f;
+                }
+                else if (miPosicion == 4)
+                {
+                    factorAceleracion = 1.1f;
+                }
+                break;
+        }
+    }
+
     #endregion
 }

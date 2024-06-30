@@ -116,8 +116,10 @@ public class EndingController : NetworkBehaviour
     // Esta función sirve para controlar que haya siempre más de un jugador en la partida
     private void ConsultarPlayers()
     {
-        if(TestLobby.Instance.NUM_PLAYERS_IN_LOBBY == 1 && UI_HUD.Instance.inicioCarrera)
+        if(TestLobby.Instance.NUM_PLAYERS_IN_LOBBY == 1 && UI_Clasificacion.instance.inicioCarrera)
         {
+            // Se limpia la lista
+            RaceController.instance._players.Clear();
             carreraFinalizada = true;
             canvasFinalAbandono.SetActive(true);
             NetworkManager.Singleton.Shutdown();

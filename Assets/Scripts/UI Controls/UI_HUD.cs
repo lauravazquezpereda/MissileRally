@@ -57,6 +57,12 @@ public class UI_HUD : NetworkBehaviour
         }
     }
 
+    public void PrepareRace()
+    {
+        inicioCarrera = true;
+        StartCoroutine(StartRace());
+    }
+
     private void Update()
     {
         if (!inicioCarrera) return;
@@ -188,7 +194,7 @@ public class UI_HUD : NetworkBehaviour
         if (pos1 != -1)
         {
             float tiempoTotal = 0;
-            for(int i = pos1*3; i < pos1 + 3; i++)
+            for(int i = pos1*3; i < pos1*3 + 3; i++)
             {
                 tiempoTotal += tiemposVueltaJugador.Values[i];
             }
@@ -202,7 +208,7 @@ public class UI_HUD : NetworkBehaviour
         if(pos2 != -1)
         {
             float tiempoTotal = 0;
-            for (int i = pos2*3; i < pos2 + 3; i++)
+            for (int i = pos2*3; i < pos2*3 + 3; i++)
             {
                 tiempoTotal += tiemposVueltaJugador.Values[i];
                 if (tiemposVueltaJugador.Values[i] == 0)
@@ -226,7 +232,7 @@ public class UI_HUD : NetworkBehaviour
         if(pos3 != -1)
         {
             float tiempoTotal = 0;
-            for (int i = pos3*3; i < pos3 + 3; i++)
+            for (int i = pos3*3; i < pos3*3 + 3; i++)
             {
                 tiempoTotal += tiemposVueltaJugador.Values[i];
                 if (tiemposVueltaJugador.Values[i] == 0)
@@ -281,6 +287,9 @@ public class UI_HUD : NetworkBehaviour
         // Se eliminan los coches
         EliminarCoches();
 
+        // Se resetea el dato de que el host ha comenzado la partida
+        TestLobby.Instance.ReiniciarEsperaHost();
+
     }
 
     public void VolverLobby()
@@ -312,15 +321,17 @@ public class UI_HUD : NetworkBehaviour
 
     private void EliminarCoches()
     {
-        if (!NetworkManager.Singleton.IsServer) return;
-        // Se obtienen todos los objetos player de la escena, para eliminarlos
-        GameObject[] carPlayers = GameObject.FindGameObjectsWithTag("Player");
-
-        foreach (GameObject carPlayer in carPlayers)
+        if (NetworkManager.Singleton.IsServer)
         {
-            if (carPlayer != null && carPlayer.GetComponent<NetworkObject>().IsSpawned)
+            // Se obtienen todos los objetos player de la escena, para eliminarlos
+            GameObject[] carPlayers = GameObject.FindGameObjectsWithTag("Player");
+
+            foreach (GameObject carPlayer in carPlayers)
             {
-                carPlayer.GetComponent<NetworkObject>().Despawn(true); // True para destruir el objeto en todas las instancias
+                if (carPlayer != null && carPlayer.GetComponent<NetworkObject>().IsSpawned)
+                {
+                    carPlayer.GetComponent<NetworkObject>().Despawn(true); // True para destruir el objeto en todas las instancias
+                }
             }
         }
 
@@ -330,8 +341,6 @@ public class UI_HUD : NetworkBehaviour
 
     public void ResetState()
     {
-        tTotal = 0f;
-        tVuelta = 0f;
         inicioCarrera = false;
         vueltasInicializadas = false;
         for (int i = 0; i < elementoHUD.Length; i++)
@@ -339,7 +348,52 @@ public class UI_HUD : NetworkBehaviour
             elementoHUD[i].SetActive(true);
         }
         textoEsperaFinal.SetActive(false);
+        tTotal = 0f;
+        tVuelta = 0f;
+        ActualizarTemporizador(tiempoTotal, tTotal);
+        ActualizarTemporizador(tiempoVuelta, tVuelta);
+        numeroVuelta.text = "1/3";
 
+    }
+
+    private IEnumerator StartRace()
+    {
+        // Fundido a negro
+        yield return StartCoroutine(FadeController.instance.FadeOut());
+
+        // Se colocan los jugadores en su posición correcta en función del resultado de la clasificación
+        NetManager.instance.GeneratePlayersOrderedInCircuit();
+
+        // Esperar dos segundos en el fundido
+        yield return new WaitForSeconds(2f);
+
+        // Se vuelven a establecer los colores
+        RaceController.instance.ModificarColorCoches();
+
+        // Fundido desde negro
+        yield return StartCoroutine(FadeController.instance.FadeIn());
+
+        ReinicializarVueltasServerRpc();
+
+    }
+
+    // Se reinician las vueltas, en caso de que al colocar los players, alguno haya travesado la línea de meta
+    [ServerRpc(RequireOwnership = false)]
+    private void ReinicializarVueltasServerRpc()
+    {
+        // Inicializar el array de vueltas
+        vueltasJugadores = new int[TestLobby.Instance.NUM_PLAYERS_IN_LOBBY];
+        for (int i = 0; i < TestLobby.Instance.NUM_PLAYERS_IN_LOBBY; i++)
+        {
+            vueltasJugadores[i] = 0;
+        }
+
+        // Inicializar el array de los tiempos de cada vuelta, cada jugador dará 3 vueltas
+        tiemposVueltaJugadores = new float[TestLobby.Instance.NUM_PLAYERS_IN_LOBBY * 3];
+        for (int i = 0; i < TestLobby.Instance.NUM_PLAYERS_IN_LOBBY * 3; i++)
+        {
+            tiemposVueltaJugadores[i] = 0;
+        }
     }
 
 }

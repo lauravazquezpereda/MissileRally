@@ -18,7 +18,10 @@ public class PlayerNetworkControls : NetworkBehaviour
     {
         // Asigna el controlador para manejar el coche
         carController = car.GetComponent<CarController>();
-        UI_HUD.Instance.inicioCarrera = true;
+        // Se asegura que se comience frenado
+        carController._rigidbody.velocity = Vector3.zero;
+        // UI_HUD.Instance.inicioCarrera = true;
+        UI_Clasificacion.instance.inicioCarrera = true;
         // Se indica al controlador del coche que es el Owner
         if (!IsOwner) return;
         carController.IsOwner = true;
@@ -28,7 +31,7 @@ public class PlayerNetworkControls : NetworkBehaviour
     void Update()
     {
         if (!IsOwner) return; // Solo el jugador propietario puede controlar su coche
-
+        if (carController.esperandoClasificacion) return; // Si está esperando a que los demás coches terminen la clasificación, no recibe inputs
         // Si se ha terminado la carrera, ya no se reciben más inputs
         if (EndingController.Instance.carreraFinalizada)
         {
@@ -47,14 +50,21 @@ public class PlayerNetworkControls : NetworkBehaviour
         // Procesa el movimiento del coche en el servidor
         ProcessMovementServerRpc(acceleration, steering, carController.ID);
 
-        // Modifica el HUD de la velocidad, con la velocidad recibida del servidor
-        UI_HUD.Instance.ModificarVelocimetro(speed);
+        // Modifica el HUD de la velocidad, con la velocidad recibida del servidor. Se actualiza en un script o en otro dependiendo de si se está en la vuelta de clasificación o no
+        if(RaceController.instance.clasificacion)
+        {
+            UI_Clasificacion.instance.ModificarVelocimetro(speed);
+        }
+        else
+        {
+            UI_HUD.Instance.ModificarVelocimetro(speed);
+        }
     }
 
     private void FixedUpdate()
     {
-        // Actualiza la posición interpolando lo recibido del servidor
-
+        // DEAD RECKONING
+        // Corrige la posición del coche, interpolando la posición calculada mediante la predicción en el cliente y la recibida del servidor
         car.transform.position = Vector3.Lerp(car.transform.position, posicionCoche, Time.deltaTime);
         car.transform.rotation = Quaternion.Lerp(car.transform.rotation, rotacionCoche, Time.deltaTime);
     }
@@ -88,10 +98,15 @@ public class PlayerNetworkControls : NetworkBehaviour
     [ClientRpc]
     void UpdateSpeedClientRpc(float currentSpeed, Vector3 posicion, Quaternion rotacion, int playerId, float ac, float st)
     {
+        if(carController == null)
+        {
+            Debug.Log("CarController nulo");
+            return;
+        }
+        // Se hace una predicción en el cliente utilizando los parámetros recibidos del servidor
+        // Además, se reciben la posición y rotación correctas 
             if (carController.ID == playerId)
             {
-                // playerCar.transform.position = Vector3.Lerp(playerCar.transform.position, posicion, Time.deltaTime);
-                // playerCar.transform.rotation = Quaternion.Lerp(playerCar.transform.rotation, rotacion, Time.deltaTime);
                 posicionCoche = posicion;
                 rotacionCoche = rotacion;
                 speed = currentSpeed;
