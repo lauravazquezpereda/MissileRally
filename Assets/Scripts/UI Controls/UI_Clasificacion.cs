@@ -165,6 +165,7 @@ public class UI_Clasificacion : NetworkBehaviour
     {
         // Se asegura de limpiar la lista de jugadores
         RaceController.instance._players.Clear();
+        RaceController.instance.numPlayers = 0;
         // Se deserializa la lista
         List<int> posiciones = new List<int>();
         for(int i = 0; i< tiemposVuelta.Values.Count; i++)
@@ -212,6 +213,7 @@ public class UI_Clasificacion : NetworkBehaviour
 
         // Se limpia la lista
         RaceController.instance._players.Clear();
+        RaceController.instance.numPlayers = 0;
     }
 
     // Con esta función se vuelve a tener el estado como al principio, por si se quiere echar otra carrera

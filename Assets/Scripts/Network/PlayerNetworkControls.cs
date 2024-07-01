@@ -66,7 +66,17 @@ public class PlayerNetworkControls : NetworkBehaviour
         // DEAD RECKONING
         // Corrige la posición del coche, interpolando la posición calculada mediante la predicción en el cliente y la recibida del servidor
         car.transform.position = Vector3.Lerp(car.transform.position, posicionCoche, Time.deltaTime);
-        car.transform.rotation = Quaternion.Lerp(car.transform.rotation, rotacionCoche, Time.deltaTime);
+        // Se actualiza la rotación del coche, con lo recbido del servidor, para evitar que quede volcado. Si es parte de la carrera, se interpola
+        // Si no, se hace directamente
+        if(carController.volviendoCheckpoint)
+        {
+            car.transform.rotation = rotacionCoche;
+        }
+        else
+        {
+            car.transform.rotation = Quaternion.Lerp(car.transform.rotation, rotacionCoche, Time.deltaTime);
+        }
+
     }
 
     [ServerRpc(RequireOwnership = false)]

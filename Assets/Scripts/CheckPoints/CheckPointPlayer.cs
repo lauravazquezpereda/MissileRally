@@ -52,7 +52,6 @@ public class CheckPointPlayer : NetworkBehaviour
     {
         if((int)OwnerClientId == id && IsOwner)
         {
-            transform.position = posicion;
             // Solo se hace el fundido si se trata del coche del propietario del juego
             // Se evita que se haga varias veces
             if (restaurandoPosicion) return;
@@ -62,10 +61,7 @@ public class CheckPointPlayer : NetworkBehaviour
         {
             // Reposicionar el coche
             CarController car = GetComponent<CarController>();
-            car._rigidbody.velocity = Vector3.zero;
-            car.InputAcceleration = 0;
-            car.InputSteering = 0;
-            car._currentSpeed = 0;
+            ResetCarPhysics(car);
             transform.position = posicion;
             transform.rotation = rotacion;
         }
@@ -74,39 +70,62 @@ public class CheckPointPlayer : NetworkBehaviour
     private IEnumerator RespawnSequence(Vector3 posicion, Quaternion rotacion)
     {
         restaurandoPosicion = true;
+
         // Fundido a negro
         yield return StartCoroutine(FadeController.instance.FadeOut());
 
-        // Reposicionar el coche
+        // Resetear las físicas del coche
         CarController car = GetComponent<CarController>();
-        car._rigidbody.velocity = Vector3.zero;
-        car.InputAcceleration = 0;
-        car.InputSteering = 0;
-        car._currentSpeed = 0;
+        ResetCarPhysics(car);
+
+        // Reasignar la posición del coche
         transform.position = posicion;
         transform.rotation = rotacion;
 
-        // Esperar dos segundos
+        // Esperar dos segundos con la pantalla en negro
         yield return new WaitForSeconds(2f);
 
         // Fundido desde negro
         yield return StartCoroutine(FadeController.instance.FadeIn());
+
         restaurandoPosicion = false;
+        car.volviendoCheckpoint = false;
     }
 
     private IEnumerator RespawnSequenceServer(Vector3 posicion, Quaternion rotacion)
     {
         restaurandoPosicion = true;
-        yield return new WaitForSeconds(2f);
-        // Reposicionar el coche
+
+        // Espera del supuesto fundido del cliente
+        yield return new WaitForSeconds(FadeController.instance.fadeDuration);
+
+        // Resetear las físicas del coche
         CarController car = GetComponent<CarController>();
+        ResetCarPhysics(car);
+
+        // Reasignar la posición del coche
+        transform.position = posicion;
+        transform.rotation = rotacion;
+
+        // Esperar dos segundos con la pantalla en negro
+        yield return new WaitForSeconds(2f);
+
+        // Espera del supuesto fundido del cliente
+        yield return new WaitForSeconds(FadeController.instance.fadeDuration);
+
+        restaurandoPosicion = false;
+        car.volviendoCheckpoint = false;
+    }
+
+    private void ResetCarPhysics(CarController car)
+    {
         car._rigidbody.velocity = Vector3.zero;
+        car._rigidbody.angularVelocity = Vector3.zero;
+        car._rigidbody.Sleep();
         car.InputAcceleration = 0;
         car.InputSteering = 0;
         car._currentSpeed = 0;
-        transform.position = posicion;
-        transform.rotation = rotacion;
-        restaurandoPosicion = false;
+        car.volviendoCheckpoint = true;
     }
 
 

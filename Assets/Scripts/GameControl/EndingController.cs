@@ -109,8 +109,7 @@ public class EndingController : NetworkBehaviour
             {
                 RaceController.instance._players[i].car.SetActive(false);
             }
-        }
-        
+        }        
     }
 
     // Esta función sirve para controlar que haya siempre más de un jugador en la partida
@@ -120,6 +119,7 @@ public class EndingController : NetworkBehaviour
         {
             // Se limpia la lista
             RaceController.instance._players.Clear();
+            RaceController.instance.numPlayers = 0;
             carreraFinalizada = true;
             canvasFinalAbandono.SetActive(true);
             NetworkManager.Singleton.Shutdown();

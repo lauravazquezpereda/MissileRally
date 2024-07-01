@@ -389,6 +389,7 @@ public class TestLobby : MonoBehaviour
             }
         }
         RaceController.instance._players.Remove(RaceController.instance._players[idNulo]);
+        RaceController.instance.numPlayers--;
     }
 
 }

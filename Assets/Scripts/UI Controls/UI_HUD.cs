@@ -337,6 +337,7 @@ public class UI_HUD : NetworkBehaviour
 
         // Se limpia la lista
         RaceController.instance._players.Clear();
+        RaceController.instance.numPlayers = 0;
     }
 
     public void ResetState()

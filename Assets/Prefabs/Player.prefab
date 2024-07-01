@@ -781,6 +781,7 @@ MonoBehaviour:
   _rigidbody: {fileID: 0}
   _currentSpeed: 0
   tiempoParado: 0
+  volviendoCheckpoint: 0
   IsOwner: 0
   esperandoClasificacion: 0
   clasificacionIniciada: 0

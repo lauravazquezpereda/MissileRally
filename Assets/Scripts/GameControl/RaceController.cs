@@ -109,6 +109,10 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
 
         for (int i = 0; i < _players.Count; ++i)
         {
+            if (_players[i] == null)
+            {
+                return;
+            }
             arcLengths[_players[i].ID] = ComputeCarArcLength(i);
         }
 

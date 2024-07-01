@@ -43,7 +43,7 @@ public class CarController : MonoBehaviour
     private const float MAX_TIEMPO_ATASCADO = 5f;
     public float tiempoParado = 0f;
 
-
+    public bool volviendoCheckpoint = false;
 
     public bool IsOwner = false; // Esta variable se encarga de indicar si el coche es del cliente que está jugando
 
