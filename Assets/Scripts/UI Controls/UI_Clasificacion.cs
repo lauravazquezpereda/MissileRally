@@ -10,7 +10,7 @@ public class UI_Clasificacion : NetworkBehaviour
 
     public bool enClasificacion = true;
 
-    // Velocímetro
+    // Mismos parámetros para el velocímetro
     private const float ANGULO_MINIMO = 83.0f;
     private const float ANGULO_MAXIMO = -142.0F;
     private const float MAX_VELOCIDAD = 55f;
@@ -39,15 +39,20 @@ public class UI_Clasificacion : NetworkBehaviour
         }
     }
 
+    // Lista que almacena los pares id y tiempo al terminar la clasificación
     public List<Clasificacion> tiemposClasificacion = new(4);
+    // Variable que almacena el número de jugadores que ha terminado la clasificación
+    // Se debe proteger esta variable bajo exclusión mutua, para evitar que se solapen las modificaciones al llegar dos jugadores a la meta a la vez
     public int numeroTerminados = 0;
-    public float tVuelta = 0f;
+    Object cerrojoClasificacion = new Object();
 
+    public float tVuelta = 0f;
+    // Tiempos de las vueltas de todos los jugadores
     public TMP_Text[] tiemposVueltas;
     public int contadorTextos = 0;
 
     public bool inicioCarrera = false;
-    private bool temporizadorActivo = false;
+    private bool temporizadorActivo = false; // Variable que hace que sólo cuente el temporizador tras pasar la meta por primera vez e iniciar la vuelta
 
     public TMP_Text temporizador;
 
@@ -65,6 +70,7 @@ public class UI_Clasificacion : NetworkBehaviour
 
     private void Update()
     {
+        // Si el temporizador está activo, se actualiza
         if(temporizadorActivo)
         {
             tVuelta += Time.deltaTime;
@@ -80,7 +86,7 @@ public class UI_Clasificacion : NetworkBehaviour
         float rotacionVelocidad_Z = Mathf.Lerp(ANGULO_MINIMO, ANGULO_MAXIMO, velocidad / MAX_VELOCIDAD);
         agujaVelocimetro.transform.rotation = Quaternion.Euler(new Vector3(rotacionActual.x, rotacionActual.y, rotacionVelocidad_Z));
     }
-
+    // Si el jugador pasa por la meta, quiere decir que ha terminado la clasificación
     public void AvanzarVuelta()
     {
         int playerIndex = (int)NetworkManager.Singleton.LocalClientId;
@@ -109,8 +115,12 @@ public class UI_Clasificacion : NetworkBehaviour
 
         // Se comunica el tiempo al resto de clientes para que lo pinten en su pantalla
         MostrarTiempoClientRpc(playerIndex, tiempoVuelta);
-
-        numeroTerminados++;
+        // Se protege el número de jugadores que han terminado bajo exclusión mutua
+        lock(cerrojoClasificacion)
+        {
+            numeroTerminados++;
+        }
+        // Si han terminado tantos como jugadores hay en el lobby
         if(numeroTerminados == TestLobby.Instance.NUM_PLAYERS_IN_LOBBY)
         {
             // Quiere decir que todos han terminado la vuelta de clasificación
@@ -131,7 +141,7 @@ public class UI_Clasificacion : NetworkBehaviour
         int minutes = Mathf.FloorToInt(tiempoVuelta / 60);
         int seconds = Mathf.FloorToInt(tiempoVuelta % 60);
 
-
+        // Se muestra el tiempo del jugador que se ha recibido desde el servidor
         tiemposVueltas[contadorTextos].text = nombreJugador + "- " + string.Format("{0:00}:{1:00}", minutes, seconds);
         contadorTextos++;
     }

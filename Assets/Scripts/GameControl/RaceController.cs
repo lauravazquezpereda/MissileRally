@@ -1,21 +1,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RaceController : MonoBehaviour //determina mi orden de carrera
+public class RaceController : MonoBehaviour 
 {
-    public int numPlayers;
-
-    [SerializeField] public List<PlayerNetwork> _players = new(4); //lista de jugadores
-    public CircuitController _circuitController;
-    public GameObject[] _debuggingSpheres; //esferas que acompañan 
-
+    // Esta clase al ser un gestor, necesita ser accesible desde distintos scripts, por lo que será un Singleton
     public static RaceController instance;
-
+    // Variable que almacena el número de jugadores de la carrera
+    public int numPlayers;
+    // Lista de jugadores, que se ordena según la posición de carrera
+    public List<PlayerNetwork> _players = new(4);
+    // Referencia al controlador del circuito
+    public CircuitController _circuitController;
+    // Esferas que siguen la línea que recorre el circuito y se utilizan para determinar la posición de carrera
+    public GameObject[] _debuggingSpheres;
+    // Variable que se utiliza para cambiar el comportamiento del juego en función de si se está en clasificación o no
     public bool clasificacion = true;
-
+    // Se indica si la carrera ha comenzado
     public bool carreraIniciada = false;
+    // Y si ya ha sido preparada
     public bool carreraPreparada = false;
-
+    // Lista que almacena las posiciones de los jugadores, únicamente con sus identificadores, ya no con su componente Player completo
     public List<int> posiciones = new(4);
 
     private void Awake()
@@ -28,9 +32,10 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
 
     private void Start()
     {
+        // Se asigna la referencia al controlador del circuito
         if (_circuitController == null) _circuitController = GetComponent<CircuitController>();
 
-        // generamos las esferas que necesitamos
+        // Se generan las esferas que recorren el circuito
         _debuggingSpheres = new GameObject[GameManager.Instance.numPlayers];
         for (int i = 0; i < GameManager.Instance.numPlayers; ++i)
         {
@@ -43,27 +48,34 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
 
     private void Update()
     {
+        // Si no hay jugadores, no se actualiza nada en el estado de la carrera
         if (_players.Count == 0)
             return;
-
+        // Si se ha iniciado la carrera, se prepara
         if(carreraIniciada && !carreraPreparada)
         {
             carreraPreparada = true;
+            // Se inicializa el circuito, una vez ya se ha escogido cuál será
             _circuitController.StartCircuit();
+            // Se modifica el color de los coches, para que el del resto de ls jugadores también sea según su información en el Lobby
             ModificarColorCoches();
         } 
         if(carreraPreparada)
         {
+            // Si ya se ha preparado la carrera, se actualiza su estado y se obtienen las posiciones ordenadas de los jugadores
             UpdateRaceProgress();
             OrderPositions();
         }
     }
-
+    // Esta función se invoca cada vez que spawnea un jugador
     public void AddPlayer(PlayerNetwork player)
     {
+        // Se añade a la lista
         _players.Add(player);
+        // Se incrementa el número de jugadores
         numPlayers++;
     }
+    // Esta clase es el comparador que se utiliza para ordenar la lista de jugadores en función de su posición
 
     private class PlayerInfoComparer : Comparer<PlayerNetwork>
     {
@@ -73,7 +85,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
         {
             _arcLengths = arcLengths;
         }
-
+        // Se implementa el método Compare en función del número de vueltas y cuál se encuentra más adelantado en la misma vuelta
         public override int Compare(PlayerNetwork x, PlayerNetwork y)
         {
             // Va en una posición inferior aquel que lleva menos vueltas
@@ -97,7 +109,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
 
         }
     }
-
+    // Esta función ordena los jugadores en la lista en función de su posición
     public void UpdateRaceProgress()
     {
 
@@ -117,7 +129,7 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
         }
 
 
-        _players.Sort(new PlayerInfoComparer(arcLengths)); //el orden de carrera sale de esta linea
+        _players.Sort(new PlayerInfoComparer(arcLengths)); // Se ordenan los jugadores
 
         string myRaceOrder = "";
         foreach (var player in _players)
@@ -153,14 +165,13 @@ public class RaceController : MonoBehaviour //determina mi orden de carrera
 
         return minArcL;
     }
-
+    // Esta función se utiliza para corregir el color de los coches
     public void ModificarColorCoches()
     {
-        // Corregir el color de los coches
-
+        // Para ello se necesita la información almacenada en el lobby, etiquetada en el diccionario con Colores
         Dictionary<string, List<string>> datosJugadores = TestLobby.Instance.GetPlayersInLobby();
         datosJugadores.TryGetValue("Colores", out List<string> colores);
-
+        // A cada jugador se le asigna su color correspondiente
         for (int i = 0; i < TestLobby.Instance.NUM_PLAYERS_IN_LOBBY; i++)
         {
             Debug.Log(colores[_players[i].ID]);

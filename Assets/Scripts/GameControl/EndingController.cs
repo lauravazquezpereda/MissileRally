@@ -10,15 +10,24 @@ using UnityEngine;
 public class EndingController : NetworkBehaviour
 {
     // ESTE SCRIPT VA A SER UTILIZADO PARA CONTROLAR EL FINAL DE LA CARRERA
-
+    // Se necesita que sea un Singleton, porque va a ser accesible desde varios scripts diferentes
     public static EndingController Instance;
+
+    // Esta variable va a almacenar el número de corredores que quedan para llegar a la meta
     public int corredoresRestantes;
+    // Esta variable va a almacenar el número de corredores que han llegado a la meta
+    public int corredoresLlegados;
+    // Se debe proteger, ya que, distintos procesos pueden intentar acceder a esta variable a la vez (variable compartida)
+    // Para ello se utiliza exclusión mutua:
+    Object cerrojoMeta = new Object(); // Cerrojo para la variable compartida
 
+    // Variable booleana que indica que ha terminado la carrera
     public bool carreraFinalizada = false;
+    // Lista que almacena el orden en el que han llegado los jugadores a la meta
     public List<int> ordenFinal;
-
+    // Número de jugadores
     public int numPlayers;
-
+    // Referencia al canvas que muestra que un jugador se ha quedado solo
     [SerializeField] GameObject canvasFinalAbandono;
 
     private void Awake()
@@ -31,30 +40,38 @@ public class EndingController : NetworkBehaviour
 
     private void Update()
     {
+        // Desde este script se comprueba si hay sólo un jugador, para terminar el juego
         ConsultarPlayers();
+        // Además, se prepara continuamente el final, es decir, los jugadores que tienen que llegar de forma dinámica
+        PrepararFinal();
     }
 
-    [ServerRpc (RequireOwnership = false)]
-    public void PrepararFinalServerRpc(int numJugadores)
+    private void PrepararFinal()
     {
-        numPlayers = numJugadores;
-        corredoresRestantes = numJugadores - 1;
+        numPlayers = TestLobby.Instance.NUM_PLAYERS_IN_LOBBY;
+        corredoresRestantes = numPlayers - 1;
     }
-
+   
     [ServerRpc(RequireOwnership = false)]
     public void AvisarMetaServerRpc(int playerIndex)
     {
-        corredoresRestantes--;
-        // Se añade el índice del que ya ha terminado a la lista
-        ordenFinal.Add(playerIndex);
+        // Se protege la variable de corredores restantes para que no se produzcan errores de concurrencia, si varios clientes mandan ejecutar la función a la vez al pasar al mismo tiempo por la meta
+        lock(cerrojoMeta)
+        {
+            corredoresLlegados++;
+            // Se añade el índice del que ya ha terminado a la lista
+            ordenFinal.Add(playerIndex);
+        }
+
         // Se oculta el coche del que ya ha terminado
         HidePlayerClientRpc(playerIndex);
         
         // Si ya no quedan corredores por llegar
-        if(corredoresRestantes == 0)
+        if(corredoresRestantes == corredoresLlegados)
         {
 
             // Se añade en el último puesto el corredor que no ha sido añadido aún a la lista
+            // Para ello, se comprueba cuál es aquel que no ha llegado a la meta
             int[] lista = new int[numPlayers];
 
             for(int i = 0; i < ordenFinal.Count; i++)
@@ -73,6 +90,7 @@ public class EndingController : NetworkBehaviour
             }
 
             // Se guarda todo en variables, para facilitar el proceso de envío al cliente, sin tener que serializar
+            // Se dejan inicializadas en -1, para que, si al recibirlas hay algún -1, quiere decir que no hay ningún jugador en dicha posición, por lo que no hay nada que mostrar
             int pos1 = -1, pos2 = -1, pos3 = -1, pos4 = -1;
 
             for(int i = 0; i < ordenFinal.Count; i++)
@@ -90,8 +108,9 @@ public class EndingController : NetworkBehaviour
 
                 }
             }
-
+            // Se serializan los tiempos por vuelta para que cada cliente muestre los suyos y el tiempo total
             FloatArray tiemposVuelta = new FloatArray { Values = UI_HUD.Instance.tiemposVueltaJugadores };
+            // Se envían los datos a una función que se ejecuta en todos los clientes
             UI_HUD.Instance.MostrarResultadosCarreraClientRpc(pos1, pos2, pos3, pos4, tiemposVuelta);
 
         }
@@ -115,12 +134,14 @@ public class EndingController : NetworkBehaviour
     // Esta función sirve para controlar que haya siempre más de un jugador en la partida
     private void ConsultarPlayers()
     {
+        // Se necesita haber comenzado la carrera para realizar esta comprobación
         if(TestLobby.Instance.NUM_PLAYERS_IN_LOBBY == 1 && UI_Clasificacion.instance.inicioCarrera)
         {
-            // Se limpia la lista
+            // Se limpia la lista y se indica que hay 0 jugadores ya
             RaceController.instance._players.Clear();
             RaceController.instance.numPlayers = 0;
             carreraFinalizada = true;
+            // Se muestra la pantalla en la que se indica que has ganado porque los demás han abandonado
             canvasFinalAbandono.SetActive(true);
             NetworkManager.Singleton.Shutdown();
         }

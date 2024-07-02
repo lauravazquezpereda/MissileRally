@@ -30,23 +30,23 @@ public class CarController : MonoBehaviour
     public float InputSteering { get; set; }
     public float InputBrake { get; set; }
 
-    // private PlayerInfo m_PlayerInfo;
-
+    // Se hace accesible su rigidbody para poder resetear las físicas del coche mientras se reposiciona
     public Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;
 
 
     public float _currentSpeed = 0;
 
+    // Estos parámetros se utilizan para controlar que el coche no se quede atascado o volcado
     private const float VELOCIDAD_MINIMA = 0.1f;
     private const float MAX_TIEMPO_VOLCADO = 2f;
     private const float MAX_TIEMPO_ATASCADO = 5f;
     public float tiempoParado = 0f;
-
+    // Variable para indicar que se está reposicionando al coche
     public bool volviendoCheckpoint = false;
 
     public bool IsOwner = false; // Esta variable se encarga de indicar si el coche es del cliente que está jugando
-
+    // Variables que controlan la clasificación y el flujo de ejecución en función de ello
     public bool esperandoClasificacion = false;
     public bool clasificacionIniciada = false;
     private float Speed
@@ -82,12 +82,13 @@ public class CarController : MonoBehaviour
 
     public void Update()
     {
+        // Si ya no se está esperando a la clasificación, se marca como falso
         if(!RaceController.instance.clasificacion)
         {
             esperandoClasificacion = false;
         }
         Speed = _rigidbody.velocity.magnitude;
-        // Se mantiene al coche quieto
+        // Se mantiene al coche quieto si se está esperando a que los demás terminen la clasificación
         if(esperandoClasificacion)
         {
             _rigidbody.velocity = Vector3.zero;
@@ -96,16 +97,20 @@ public class CarController : MonoBehaviour
         if(Speed <= VELOCIDAD_MINIMA && !this.isDumped && !esperandoClasificacion)
         {
             tiempoParado+= Time.deltaTime;
+            // Si está más tiempo parado del que se permite, se comprueba primero si ha volcado
             if(tiempoParado >= MAX_TIEMPO_VOLCADO)
             {
                 CheckDump();
             }
+            // Si no está volcado, pero está inmovilizado en alguna parte, se resetea su estado y se envía al último checkpoint
             if(tiempoParado >= MAX_TIEMPO_ATASCADO)
             {
+                // Se reinicia el tiempo parado
                 tiempoParado = 0f;
                 CheckPointPlayer checkPoint = GetComponent<CheckPointPlayer>();
                 if (checkPoint != null)
                 {
+                    // Se ejecuta la función de respawn con -1, para hacer que se vuelva al 100% al checkpoint anterior
                     checkPoint.OnCheckPointPassedServerRpc(-1, ID);
                 }
             }
@@ -115,11 +120,13 @@ public class CarController : MonoBehaviour
             tiempoParado = 0f;
         }
 
+        // También se comprueba si el coche está fuera del circuito
         OutOfCircuit();
+        // Se aplica la técnica rubber band, que modifica la velocidad del coche en función de la posición, utilizando un factor en su aceleración
         RubberBand();
     }
 
-    public void FixedUpdate() //logica de conducir
+    public void FixedUpdate() 
     {
         InputSteering = Mathf.Clamp(InputSteering, -1, 1);
         InputAcceleration = Mathf.Clamp(InputAcceleration, -1, 1);
@@ -277,7 +284,7 @@ public class CarController : MonoBehaviour
         CurrentRotation = transform.eulerAngles.y;
     }
 
-    // Método que actualiza el coche si ha volcado o no
+    // Método que actualiza el coche si ha volcado o no utilizando su rotación
     private void CheckDump()
     {
         if (Math.Abs(transform.rotation.eulerAngles.z) > 50 && !waiting && !EndingController.Instance.carreraFinalizada)
@@ -329,6 +336,7 @@ public class CarController : MonoBehaviour
                 CheckPointPlayer checkPoint = GetComponent<CheckPointPlayer>();
                 if (checkPoint != null)
                 {
+                    // Se hace que se vuelva al último punto de control
                     checkPoint.OnCheckPointPassedServerRpc(-1, ID);
                 }
                 return true;
@@ -340,10 +348,13 @@ public class CarController : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
+        // Cada vez que un coche atraviesa la meta
         if(other.gameObject.tag == "Meta")
         {
+            // Si ese coche es el propietatio
             if(IsOwner)
             {
+                // La primera vez que se atraviesa la meta en la clasificación es para hacer que empiece el temporizador
                 if(RaceController.instance.clasificacion)
                 {
                     if(!clasificacionIniciada)
@@ -351,6 +362,7 @@ public class CarController : MonoBehaviour
                         clasificacionIniciada = true;
                         UI_Clasificacion.instance.EmpezarTemporizador();
                     }
+                    // La segunda vez es para finalizar la clasificación
                     else if(clasificacionIniciada && !esperandoClasificacion)
                     {
                         UI_Clasificacion.instance.AvanzarVuelta();
@@ -358,6 +370,7 @@ public class CarController : MonoBehaviour
                         esperandoClasificacion = true;
                     }
                 }
+                // Si no se está en clasificación, se avanza una vuelta en la carrera
                 else
                 {
                     UI_HUD.Instance.AvanzarVuelta();

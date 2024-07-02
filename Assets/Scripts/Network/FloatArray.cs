@@ -3,9 +3,12 @@ using Unity.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 
-// Mediante esta estructura, se va a poder serializar el array de floats que almacena los tiempos de los jugadores
+// En este script se crean dos estructuras, que se pueden serializar para enviarlos en peticiones Rpc
+
+// Esta estructura se utiliza para poder transmitir un array de floats, que se usa para enviar todos los tiempos de las vueltas almacenados en el servidor, a los clientes
 public struct FloatArray : INetworkSerializable
 {
+    // Para acceder a los elementos, se utiliza el atributo Values
     public float[] Values;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -24,9 +27,10 @@ public struct FloatArray : INetworkSerializable
         }
     }
 }
-
+// Esta estructura se utiliza para transmitir la lista con las posiciones de los jugadores tras la clasificación
 public struct IntList : INetworkSerializable
 {
+    // Para acceder a los elementos, se utiliza el atributo Values
     public List<int> Values;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter

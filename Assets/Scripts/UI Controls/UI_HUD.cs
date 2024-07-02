@@ -7,42 +7,43 @@ using UnityEngine;
 
 public class UI_HUD : NetworkBehaviour
 {
+    // Se hace que esta clase sea un Singleton
     public static UI_HUD Instance;
 
+    // Estas variables se utilizan para calcular la orientación de la aguja del velocímetro en función de la velocidad del coche
     private const float ANGULO_MINIMO = 83.0f;
     private const float ANGULO_MAXIMO = -142.0F;
     private const float MAX_VELOCIDAD = 55f;
-
+    // Referencia a la imagen del velocímetro
     [SerializeField] GameObject agujaVelocimetro;
-
+    // Texto que muestra en qué vuelta se encuentra el jugador
     [SerializeField] TMP_Text numeroVuelta;
-
+    // Texto que muestra cuánto tiempo lleva el jugador en la carrera
     [SerializeField] TMP_Text tiempoTotal;
+    // Texto que muestra el tiempo que lleva el jugador en la vuelta actual
     [SerializeField] TMP_Text tiempoVuelta;
 
-    public float tTotal;
-    public float tVuelta;
+    public float tTotal; // Contador de tiempo total
+    public float tVuelta; // Contador de tiempo por vuelta
 
-    public bool inicioCarrera = false;
-    public bool vueltasInicializadas = false;
+    public bool inicioCarrera = false; // Se indica si se ha inicializado la carrera
+    public bool vueltasInicializadas = false; // Se indica si se han inicializado las listas de vueltas
 
     // Se almacenan las vueltas de los jugadores en el servidor
-    public int[] vueltasJugadores;
-    public float[] tiemposVueltaJugadores;
+    public int[] vueltasJugadores; // Número de vueltas que lleva cada jugador
+    public float[] tiemposVueltaJugadores; // Tiempo que ha tardado cada jugador en dar cada vuelta
 
-    [SerializeField] private GameObject canvasTiemposFinal;
+    [SerializeField] private GameObject canvasTiemposFinal; // Pantalla que muestra los resultados finales
 
-    [SerializeField] private GameObject[] elementoHUD;
-    [SerializeField] private GameObject textoEsperaFinal;
+    [SerializeField] private GameObject[] elementoHUD; // Lista con todos los elementos del HUD para poder ocultarlos
+    [SerializeField] private GameObject textoEsperaFinal; // Texto de espera para mostrar cuando un jugador ha terminado la carrera y queda alguno más por terminar
 
     // Resultados finales
-    [SerializeField] private TMP_Text[] clasificacion;
-    [SerializeField] private TMP_Text[] tiemposFinalesVuelta;
-
-    [SerializeField] GameObject canvasLobby;
+    [SerializeField] private TMP_Text[] clasificacion; // Clasificación del final de carrera
+    [SerializeField] private TMP_Text[] tiemposFinalesVuelta; // Tiempos finales de cada vuelta
 
     // Posición de carrera
-    [SerializeField] private TMP_Text posicionCarrera;
+    [SerializeField] private TMP_Text posicionCarrera; // Muestra la posición del coche en la carrera
 
 
     private void Awake()
@@ -56,7 +57,7 @@ public class UI_HUD : NetworkBehaviour
             Destroy(gameObject);
         }
     }
-
+    // Se prepara la carrera
     public void PrepareRace()
     {
         inicioCarrera = true;
@@ -69,7 +70,6 @@ public class UI_HUD : NetworkBehaviour
 
         if(!vueltasInicializadas)
         {
-            EndingController.Instance.PrepararFinalServerRpc(TestLobby.Instance.NUM_PLAYERS_IN_LOBBY);
             // Se inicializa la lista de vueltas
             vueltasInicializadas = true;
             if (IsServer)
@@ -89,13 +89,13 @@ public class UI_HUD : NetworkBehaviour
                 }
             }
         }
-
+        // Continuamente se actualizan los temporizadores con el tiempo total y el tiempo por vuelta
         tTotal += Time.deltaTime;
         tVuelta += Time.deltaTime;
-
+        // Además, se actualizan los textos
         ActualizarTemporizador(tiempoTotal, tTotal);
         ActualizarTemporizador(tiempoVuelta, tVuelta);
-
+        // También, se actualiza la posición del coche en la carrera
         ActualizarPosicionCarrera();
 
     }
@@ -112,6 +112,7 @@ public class UI_HUD : NetworkBehaviour
 
     public void AvanzarVuelta()
     {
+        // Cada vez que se pasa por la meta siendo propietario, se ejecuta este método y se comunica al servidor
         int playerIndex = (int)NetworkManager.Singleton.LocalClientId;
         AvanzarVueltaServerRpc(playerIndex, tVuelta);
     }
@@ -120,20 +121,25 @@ public class UI_HUD : NetworkBehaviour
     private void AvanzarVueltaServerRpc(int playerIndex, float tiempoVuelta)
     {
         Debug.Log("Avanzar vuelta");
-        // Se añade el tiempo de vuelta
+        // Se obtiene en qué vuelta se encuentra el jugador justo antes de pasar por la meta
         int vueltaActual = vueltasJugadores[playerIndex] - 1;
         if(vueltaActual >= 0)
         {
+            // Se añade el tiempo en la lista de tiempos (están ordenadas las 3 vueltas de cada jugador del 0 al 3). Por ello se multiplica por el número de vueltas (3) y el índice,
+            // sumándole la vuelta actual
             tiemposVueltaJugadores[3 * playerIndex + vueltaActual] = tiempoVuelta;
         }
         // Se actualiza el número de vueltas sólo en el servidor
         vueltasJugadores[playerIndex]++;
+        // No es necesario proteger estas variables, ya que, cada cliente modifica las suyas y no se solapan
         if (vueltasJugadores[playerIndex] <= 3)
         {
+            // Si la vuelta a la que se avanza no indica que es el final, se comunica al cliente
             ActualizarNumeroVueltasClientRpc(vueltasJugadores[playerIndex], playerIndex);
         }
         else
         {
+            // Si no, se ejecuta el final de carrera en el cliente
             FinalizarCarreraClientRpc(playerIndex);
         }
     }
@@ -150,9 +156,11 @@ public class UI_HUD : NetworkBehaviour
             }
         }
         if (playerIndex != (int)NetworkManager.Singleton.LocalClientId) return;
+        // Sólo se actualiza el número de vuelta en el propietario, el resto sólo sirven para procesar las posiciones
         numeroVuelta.text = vueltaActual.ToString() + "/3";
         if (vueltaActual - 1 > 0)
         {
+            // Se reinicia el tiempo por vuelta
             Debug.Log("Reiniciando tiempo");
             tVuelta = 0;
         }
@@ -171,6 +179,7 @@ public class UI_HUD : NetworkBehaviour
             elementoHUD[i].SetActive(false);
         }
         textoEsperaFinal.SetActive(true);
+        // Se avisa al controlador de la finalización en el servidor, para que guarde los tiempos y vea si ya han terminado todos los jugadores necesarios
         EndingController.Instance.AvisarMetaServerRpc(playerIndex);
         
     }
@@ -194,6 +203,7 @@ public class UI_HUD : NetworkBehaviour
         if (pos1 != -1)
         {
             float tiempoTotal = 0;
+            // Teniendo en cuenta cómo están ordenados los tiempos por vuelta, se calcula el tiempo total de carrera de cada jugador
             for(int i = pos1*3; i < pos1*3 + 3; i++)
             {
                 tiempoTotal += tiemposVueltaJugador.Values[i];
@@ -201,7 +211,7 @@ public class UI_HUD : NetworkBehaviour
 
             int minutes = Mathf.FloorToInt(tiempoTotal / 60);
             int seconds = Mathf.FloorToInt(tiempoTotal % 60);
-
+            // Se muestra por pantalla
             clasificacion[0].text = "1º - " + nombres[pos1] + " -> "+ string.Format("{0:00}:{1:00}", minutes, seconds); 
             Debug.Log(pos1);
         }
@@ -211,6 +221,7 @@ public class UI_HUD : NetworkBehaviour
             for (int i = pos2*3; i < pos2*3 + 3; i++)
             {
                 tiempoTotal += tiemposVueltaJugador.Values[i];
+                // En caso de que alguna vuelta valga 0 segundos, quiere decir que el jugador no ha terminado la carrera, por lo que, no se muestra un tiempo total
                 if (tiemposVueltaJugador.Values[i] == 0)
                 {
                     tiempoTotal = 0;
@@ -291,20 +302,14 @@ public class UI_HUD : NetworkBehaviour
         TestLobby.Instance.ReiniciarEsperaHost();
 
     }
-
-    public void VolverLobby()
-    {
-        canvasLobby.SetActive(true);
-        canvasTiemposFinal.SetActive(false);
-    }
-
+    // Esta función actualiza el texto del temporizador
     private void ActualizarTemporizador(TMP_Text texto, float tiempo)
     {
         int minutes = Mathf.FloorToInt(tiempo / 60F);
         int seconds = Mathf.FloorToInt(tiempo % 60F);
         texto.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
-
+    // Esta función se encarga de actualizar la posición de la carrera en función de la lista ordenada de jugadores
     private void ActualizarPosicionCarrera()
     {
         int posicion = 0;
@@ -340,15 +345,19 @@ public class UI_HUD : NetworkBehaviour
         RaceController.instance.numPlayers = 0;
     }
 
+    // Esta función se ejecuta para limpiar el estado de la clase, en el caso de que se quiera hacer una nueva carrera
     public void ResetState()
     {
+        // Se indica que no se ha iniciado la carrera, que las vueltas están sin inicializar
         inicioCarrera = false;
         vueltasInicializadas = false;
+        // Se vuelven a activar todos los elementos del HUD y a desactivar el texto de que se ha llegado a la meta
         for (int i = 0; i < elementoHUD.Length; i++)
         {
             elementoHUD[i].SetActive(true);
         }
         textoEsperaFinal.SetActive(false);
+        // Se reinician los temporizadores y el número de vueltas por defecto
         tTotal = 0f;
         tVuelta = 0f;
         ActualizarTemporizador(tiempoTotal, tTotal);

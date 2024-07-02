@@ -5,11 +5,12 @@ using UnityEngine;
 
 public class PlayerNetworkControls : NetworkBehaviour
 {
+    // Se utiliza una referencia al objeto coche del jugador, que es lo que va a controlar y se va a mover
     public GameObject car;
-    public CarController carController;
+    public CarController carController; // Por ello, es necesario guardar el controlador que lo maneja, para poder aplicarle los inputs
     // Esta variable se utiliza para almacenar la velocidad del coche, que se recibe del servidor
     private float speed;
-    // Estas variables se utilizan para actualizar la posición y la rotación del coche en los clientes
+    // Estas variables se utilizan para actualizar la posición y la rotación del coche en los clientes recibidos del servidor, para llevar a cabo la interpolación (dead reckoning)
     private Vector3 posicionCoche;
     private Quaternion rotacionCoche;
 
@@ -20,7 +21,7 @@ public class PlayerNetworkControls : NetworkBehaviour
         carController = car.GetComponent<CarController>();
         // Se asegura que se comience frenado
         carController._rigidbody.velocity = Vector3.zero;
-        // UI_HUD.Instance.inicioCarrera = true;
+        // Se comunica a la UI de la clasificación que se ha iniciado la carrera
         UI_Clasificacion.instance.inicioCarrera = true;
         // Se indica al controlador del coche que es el Owner
         if (!IsOwner) return;
@@ -35,12 +36,14 @@ public class PlayerNetworkControls : NetworkBehaviour
         // Si se ha terminado la carrera, ya no se reciben más inputs
         if (EndingController.Instance.carreraFinalizada)
         {
+            // Si se sigue estando conectado, mientras que el coche está parado, envía dicha información al servidor, para que permanezca quieto
             if(NetworkManager.Singleton.IsConnectedClient)
             {
                 ProcessMovementServerRpc(0, 0, carController.ID);
             }
             return;
         }
+        // Se declaran la aceleración y la dirección
         float acceleration, steering;
 
         // Captura la entrada de aceleración y dirección
@@ -83,24 +86,29 @@ public class PlayerNetworkControls : NetworkBehaviour
     void ProcessMovementServerRpc(float acceleration, float steering, int playerId)
     {
         float currentSpeed = 0f;
-
+        // El servidor recorre su lista de jugadores, para comprobar de cuál se está recibiendo la información de los inputs
+        // Esta función no genera problemas de concurrencia, ya que, cada cliente sólo va a poder mandar los inputs del coche que controla, por lo que no se solapan
         foreach (PlayerNetwork player in GameManager.Instance.currentRace._players)
         {
+            // Si el ID coincide con el que se ha recibido, quiere decir que se trata del coche correcto
             if (player.ID == playerId)
             {
                 // Actualiza la entrada de aceleración y dirección en el jugador correspondiente, para que se mueva adecuadamente
+                // Para ello, se necesita su controlador
                 CarController playerCar = player.GetComponentInChildren<CarController>();
                 if(playerCar != null)
                 {
+                    // Se asignan la aceleración y la dirección obtenidas
                     playerCar.InputAcceleration = acceleration;
                     playerCar.InputSteering = steering * 0.5f; // Reducir la brusquedad al cambiar de dirección
-                    currentSpeed = playerCar._currentSpeed; // Se obtiene la velocidad actual del coche, para después transmitirla a los clientes
+                    currentSpeed = playerCar._currentSpeed; // Se obtiene la velocidad actual del coche, para después transmitirla a los clientes y que puedan actualizar su HUD
+                    // Se capturan la posición y rotación instantáneas, para que los clientes puedan llevar a cabo la interpolación
                     posicionCoche = playerCar.transform.position;
                     rotacionCoche = playerCar.transform.rotation;
                 }
             }
         }
-
+        // Se comunican todos los parámetros a los clientes, para que actualicen correctamente el estado del coche que se ha modificado con los inputs
         UpdateSpeedClientRpc(currentSpeed, posicionCoche, rotacionCoche, playerId, acceleration, steering);
     }
 
@@ -108,21 +116,22 @@ public class PlayerNetworkControls : NetworkBehaviour
     [ClientRpc]
     void UpdateSpeedClientRpc(float currentSpeed, Vector3 posicion, Quaternion rotacion, int playerId, float ac, float st)
     {
+        // Para evitar errores, no se procesa la información si el controlador del coche ha sido eliminado
         if(carController == null)
         {
             Debug.Log("CarController nulo");
             return;
         }
-        // Se hace una predicción en el cliente utilizando los parámetros recibidos del servidor
-        // Además, se reciben la posición y rotación correctas 
-            if (carController.ID == playerId)
-            {
-                posicionCoche = posicion;
-                rotacionCoche = rotacion;
-                speed = currentSpeed;
-                carController.InputAcceleration = ac;
-                carController.InputSteering = st * 0.5f;
-            }        
+        // Se hace una predicción en el cliente utilizando los parámetros recibidos del servidor (aceleración y dirección)
+        // Además, se reciben la posición y rotación correctas, para llevar a cabo la interpolación
+        if (carController.ID == playerId)
+        {
+            posicionCoche = posicion;
+            rotacionCoche = rotacion;
+            speed = currentSpeed; // Se recibe además la velocidad, para poder actualizar el velocímetro en caso de que se trate del coche propietario
+            carController.InputAcceleration = ac;
+            carController.InputSteering = st * 0.5f;
+        }        
     }
     
 

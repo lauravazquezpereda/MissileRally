@@ -12,6 +12,7 @@ public class CircuitController : MonoBehaviour
         get { return _totalLength; }
     }
 
+    // En lugar de iniciar directamente los parámetros del circuito, hay que esperar a que se haya elegido en qué circuito va a ser la carrera
     public void StartCircuit()
     {
         _circuitPath = GetComponentInChildren<LineRenderer>();
