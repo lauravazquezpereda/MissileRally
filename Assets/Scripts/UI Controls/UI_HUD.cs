@@ -45,6 +45,9 @@ public class UI_HUD : NetworkBehaviour
     // Posición de carrera
     [SerializeField] private TMP_Text posicionCarrera; // Muestra la posición del coche en la carrera
 
+    // Variable que indica que se está preparando la carrera
+    public bool preparandoCarrera = false;
+
 
     private void Awake()
     {
@@ -368,6 +371,8 @@ public class UI_HUD : NetworkBehaviour
 
     private IEnumerator StartRace()
     {
+        // Se indica que se está preparando la carrera
+        preparandoCarrera = true;
         // Fundido a negro
         yield return StartCoroutine(FadeController.instance.FadeOut());
 
@@ -384,6 +389,9 @@ public class UI_HUD : NetworkBehaviour
         yield return StartCoroutine(FadeController.instance.FadeIn());
 
         ReinicializarVueltasServerRpc();
+
+        // Se indica que se ha terminado de preparar la carrera
+        preparandoCarrera = false;
 
     }
 

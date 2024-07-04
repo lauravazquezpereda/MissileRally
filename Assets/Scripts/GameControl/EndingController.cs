@@ -29,6 +29,10 @@ public class EndingController : NetworkBehaviour
     public int numPlayers;
     // Referencia al canvas que muestra que un jugador se ha quedado solo
     [SerializeField] GameObject canvasFinalAbandono;
+    // Referencia al canvas que muestra que un jugador se ha desconectado en mitad de la carrera
+    [SerializeField] GameObject canvasFinalDesconexion;
+    // Referencia al canvas que muestra que el host se ha desconectado en mitad de la carrera
+    [SerializeField] GameObject canvasFinalDesconexionHost;
 
     private void Awake()
     {
@@ -145,6 +149,30 @@ public class EndingController : NetworkBehaviour
             canvasFinalAbandono.SetActive(true);
             NetworkManager.Singleton.Shutdown();
         }
+    }
+
+    // Esta función se ejecuta cuando algún cliente se desconecta en mitad de la partida, dejando a los demás perdidos
+    public void FinalizarDesconexion()
+    {
+        // Se limpia la lista y se indica que hay 0 jugadores ya
+        RaceController.instance._players.Clear();
+        RaceController.instance.numPlayers = 0;
+        carreraFinalizada = true;
+        // Se muestra la pantalla en la que se indica que un jugador se ha desconectado
+        canvasFinalDesconexion.SetActive(true);
+        NetworkManager.Singleton.Shutdown();
+    }
+
+    // Esta función se ejecuta cuando el host se desconecta en mitad de la partida
+    public void FinalizarDesconexionHost()
+    {
+        // Se limpia la lista y se indica que hay 0 jugadores ya
+        RaceController.instance._players.Clear();
+        RaceController.instance.numPlayers = 0;
+        carreraFinalizada = true;
+        // Se muestra la pantalla en la que se indica que un jugador se ha desconectado
+        canvasFinalDesconexionHost.SetActive(true);
+        NetworkManager.Singleton.Shutdown();
     }
 
 }

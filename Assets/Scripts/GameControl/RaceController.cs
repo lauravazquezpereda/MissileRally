@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class RaceController : MonoBehaviour 
@@ -21,6 +24,8 @@ public class RaceController : MonoBehaviour
     public bool carreraPreparada = false;
     // Lista que almacena las posiciones de los jugadores, únicamente con sus identificadores, ya no con su componente Player completo
     public List<int> posiciones = new(4);
+    // Se utiliza un semáforo para gestionar la desconexión de un cliente
+    public SemaphoreSlim barreraDesconexion = new(1);
 
     private void Awake()
     {
@@ -125,9 +130,15 @@ public class RaceController : MonoBehaviour
             {
                 return;
             }
-            arcLengths[_players[i].ID] = ComputeCarArcLength(i);
+            try
+            {
+                arcLengths[_players[i].ID] = ComputeCarArcLength(i);
+            } catch(IndexOutOfRangeException)
+            {
+                Debug.Log("Se ha eliminado ese jugador");
+                return;
+            }
         }
-
 
         _players.Sort(new PlayerInfoComparer(arcLengths)); // Se ordenan los jugadores
 

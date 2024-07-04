@@ -47,6 +47,8 @@ public class PlayerNetwork : NetworkBehaviour
         carController = car.GetComponent<CarController>();
         // El ID se consigue mediante el identificador asignado al conectarse el cliente en red
         ID = (int) OwnerClientId;
+        // Se le asigna el identificador al controlador
+        carController.ID = ID;
 
         // Se obtiene el nombre del jugador, mediante la lista de datos almacenados en el lobby
         Dictionary<string, List<string>> datosJugadores = TestLobby.Instance.GetPlayersInLobby();
@@ -62,8 +64,6 @@ public class PlayerNetwork : NetworkBehaviour
 
         // Al aparecer, se hace que la cámara siga al coche
         if (!IsOwner) return; // La camara sigue su propio objeto player no el de lo demás jugadores
-        // Se le asigna el identificador al controlador
-        carController.ID = ID;
         // Se hace que la cámara siga y mire hacia el coche
         GameObject.FindGameObjectWithTag("FollowCamera").GetComponent<CinemachineVirtualCamera>().Follow = car.transform;
         GameObject.FindGameObjectWithTag("FollowCamera").GetComponent<CinemachineVirtualCamera>().LookAt = car.transform;

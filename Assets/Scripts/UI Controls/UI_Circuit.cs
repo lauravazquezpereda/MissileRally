@@ -32,6 +32,8 @@ public class UI_Circuit : NetworkBehaviour
     public bool finalizarMenu = false;
     // Variable que indica que se está reiniciando el menú tras haber hecho ya una carrera
     private bool reiniciarCarrera = false;
+    // Variable que indica que se está preparando la salida
+    public bool preparandoSalida = false;
 
     private void Awake()
     {
@@ -179,6 +181,9 @@ public class UI_Circuit : NetworkBehaviour
 
     private IEnumerator StartingSequence()
     {
+        // Se indica que se está preparando la salida
+        preparandoSalida = true;
+
         // Fundido a negro
         yield return StartCoroutine(FadeController.instance.FadeOut());
 
@@ -200,6 +205,8 @@ public class UI_Circuit : NetworkBehaviour
         // Fundido desde negro
         yield return StartCoroutine(FadeController.instance.FadeIn());
 
+        // Se indica que se ha terminado de preparar la salida
+        preparandoSalida = false;
     }
     // Esta función se ejecuta cuando tras haber empezado ya una carrera, después se quiere iniciar otra
     public void ResetState()

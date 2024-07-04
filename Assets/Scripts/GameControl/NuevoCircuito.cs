@@ -13,6 +13,8 @@ public class NuevoCircuito : MonoBehaviour
     // Este script se utiliza para controlar lo que sucede después de terminar una carrera y querer comenzar otra, o al quedarse solo y querer volver al lobby
     // Por lo tanto, se utiliza una referencia a todas las pantallas del canvas involucradas, para poder ocultar unas y mostrar otras, en función del caso
     [SerializeField] GameObject canvasFinalJuego;
+    [SerializeField] GameObject canvasSalidaCliente;
+    [SerializeField] GameObject canvasSalidaHost;
     [SerializeField] GameObject canvasCircuito;
     [SerializeField] GameObject HUD_Clasificacion;
     [SerializeField] GameObject HUD_Carrera;
@@ -71,6 +73,8 @@ public class NuevoCircuito : MonoBehaviour
         textoEspera.SetActive(false);
         // Se desactiva el canvas de final
         canvasSoloFin.SetActive(false);
+        canvasSalidaCliente.SetActive(false);
+        canvasSalidaHost.SetActive(false);
         // Se vuelve a mostrar el canvas de espera en el lobby
         canvasLobbyWaiting.SetActive(true);
         // Se hace visible el HUD de la clasificación

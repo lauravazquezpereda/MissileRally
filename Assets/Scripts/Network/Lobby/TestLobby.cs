@@ -39,6 +39,11 @@ public class TestLobby : MonoBehaviour
     public bool juegoIniciado = false;
     // Variable pública accesible desde todos los demás scripts, que se utilizar para contar el número de jugadores que hay conectados en el momento
     public int NUM_PLAYERS_IN_LOBBY;
+    // Variable que almacena la clave del relay creado por el host
+    public string relayCode;
+    public string KEY_START_GAME = "relayCode"; // Key para el diccionario
+    // Variable que se utiliza para indicar que se está eliminando un jugador
+    public bool jugadorEliminado = false;
 
     private void Awake()
     {
@@ -110,7 +115,12 @@ public class TestLobby : MonoBehaviour
             {
                 IsPrivate = true,
                 // DEFINICIÓN DE LAS CARACTERÍSTICAS QUE VA A TENER CADA JUGADOR
-                Player = GetPlayer()
+                Player = GetPlayer(),
+                Data = new Dictionary<string, DataObject>
+                {
+                    // Se añade un campo para almacenar la clave del Relay
+                    { KEY_START_GAME, new DataObject(DataObject.VisibilityOptions.Member, "0") }
+                }
             };
             // Creación del objeto sala, con un nombre y un máximo de jugadores. Hasta que no se cree no se continua
             Lobby lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, MAX_PLAYERS, options);
@@ -280,7 +290,10 @@ public class TestLobby : MonoBehaviour
                 // Mediante un delegado, se espera a que la tarea finalice para continuar
                 yield return new WaitUntil(() => tarea.IsCompleted);
                 // Se actualiza el número de jugadores en la sala
-                NUM_PLAYERS_IN_LOBBY = joinedLobby.Players.Count;
+                if(joinedLobby != null)
+                {
+                    NUM_PLAYERS_IN_LOBBY = joinedLobby.Players.Count;
+                }
             }
         }
     }
@@ -332,10 +345,28 @@ public class TestLobby : MonoBehaviour
 
         // El primer jugador del lobby será el host
         var hostPlayer = joinedLobby.Players[0];
+
         // Si nos encontramos por lo tanto en la build en la que el ID coincide con el ID obtenido para el host, se inicia el juego como Host
         if (AuthenticationService.Instance.PlayerId == hostPlayer.Id)
         {
             // Este jugador es el host
+            // Antes de iniciarse, se crea el espacio de Relay, reservado para 4 jugadores incluyendo al Host
+            // Se espera a que se cree para continuar
+            await RelayManager.Instance.CreateRelay(MAX_PLAYERS);
+            // Una vez creado se obtiene la clave
+            relayCode = RelayManager.Instance.joinCode;
+            // Se actualiza el lobby con dicha clave, para que al intentar iniciar, los jugadores no necesiten introducir este código
+            Lobby lobby = await Lobbies.Instance.UpdateLobbyAsync(joinedLobby.Id, new UpdateLobbyOptions
+            {
+                Data = new Dictionary<string, DataObject> {
+                    {
+                        KEY_START_GAME, new DataObject(DataObject.VisibilityOptions.Member, relayCode)
+                    } }
+            });
+            // Se actualiza la referencia del lobby actual
+            joinedLobby = lobby;
+
+            // Una vez hecho, se inicia el Host
             NetworkManager.Singleton.StartHost();
 
             // Actualizar el lobby para indicar que el juego ha comenzado
@@ -372,7 +403,11 @@ public class TestLobby : MonoBehaviour
             if (joinedLobby.Players[0].Data.TryGetValue("HostStarted", out PlayerDataObject hostStarted) && hostStarted.Value == "true")
             {
                 // Comienza el juego como un cliente
-                NetworkManager.Singleton.StartClient();
+                // Primero debe de unirse al Relay que haya creado el Host
+                // Para hacerlo, primero debe conseguir la clave del Relay
+                relayCode = joinedLobby.Data[KEY_START_GAME].Value;
+                // Después, se utiliza para unirse al Relay. Una vez hecho, se comienza el juego como cliente
+                RelayManager.Instance.JoinRelay(relayCode);
                 // Se muestra el menú de selección de circuito
                 UI_Circuit.instance.MostrarMenu();
                 yield break;
@@ -406,6 +441,7 @@ public class TestLobby : MonoBehaviour
     // Esta función se ejecuta cuando un cliente se desconecta y se encarga de eliminarlo de la lista de jugadores de la carrera
     public void OnClientDisconnected(ulong clientId)
     {
+        jugadorEliminado = true;
         // Primero se buscan todas las componentes nulas de la lista de jugadores, para eliminarlas
         int idNulo = 0;
         for(int i=0; i<RaceController.instance._players.Count; i++)
@@ -417,6 +453,16 @@ public class TestLobby : MonoBehaviour
         RaceController.instance._players.Remove(RaceController.instance._players[idNulo]);
         // Se decrementa el número de jugadores
         RaceController.instance.numPlayers--;
+        // Se comprueba si es el host quien se ha desconectado, para informar a los jugadores
+        if(clientId == 0)
+        {
+            EndingController.Instance.FinalizarDesconexionHost();
+        }
+        // Se hace que termine la carrera por abandono, en caso de que queden más jugadores, informando de la situación
+        if(RaceController.instance.numPlayers > 1)
+        {
+            EndingController.Instance.FinalizarDesconexion();
+        }
     }
 
 }
